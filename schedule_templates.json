@@ -1,0 +1,85 @@
+{
+    "templates": [
+        {
+            "id": 1,
+            "name": "Standard Mon-Fri",
+            "description": "Monday through Friday work schedule",
+            "schedule": [
+                0,
+                1,
+                1,
+                1,
+                1,
+                1,
+                0
+            ],
+            "created_by": "System",
+            "created_at": "2025-08-04T12:06:17+00:00"
+        },
+        {
+            "id": 2,
+            "name": "Weekend Shift",
+            "description": "Saturday and Sunday work schedule",
+            "schedule": [
+                1,
+                0,
+                0,
+                0,
+                0,
+                0,
+                1
+            ],
+            "created_by": "System",
+            "created_at": "2025-08-04T12:06:17+00:00"
+        },
+        {
+            "id": 3,
+            "name": "Full Week",
+            "description": "Seven days a week schedule",
+            "schedule": [
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1
+            ],
+            "created_by": "System",
+            "created_at": "2025-08-04T12:06:17+00:00"
+        },
+        {
+            "id": 4,
+            "name": "Sun-thur",
+            "description": "Sunday coverage",
+            "schedule": [
+                1,
+                1,
+                1,
+                1,
+                1,
+                0,
+                0
+            ],
+            "created_by": "Darren Wise",
+            "created_at": "2025-08-21T13:26:13+00:00"
+        },
+        {
+            "id": 5,
+            "name": "Tues-Saturday",
+            "description": "Saturday coverage",
+            "schedule": [
+                0,
+                0,
+                1,
+                1,
+                1,
+                1,
+                1
+            ],
+            "created_by": "Darren Wise",
+            "created_at": "2025-08-21T13:26:56+00:00"
+        }
+    ],
+    "lastUpdated": "2025-08-21T13:26:56+00:00"
+}

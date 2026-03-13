@@ -1,0 +1,755 @@
+/**
+ * Unified Support Schedule — Mobile & PWA Styles v2
+ * Fixes: black bar overflow, controls clipping, schedule table scroll
+ */
+
+/* ─── PWA safe-area variables ─────────────────────────────────────────────── */
+:root {
+  --safe-top:    env(safe-area-inset-top,    0px);
+  --safe-right:  env(safe-area-inset-right,  0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left:   env(safe-area-inset-left,   0px);
+  --bottom-nav-h: 62px;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   CRITICAL: Kill the black bar.
+   Root cause: child elements wider than viewport escape the container.
+   Fix: clip at html+body, never let any child widen the page.
+══════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  html, body {
+    overflow-x: hidden !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+  }
+
+  body {
+    padding: 0 !important;
+    padding-bottom: calc(var(--bottom-nav-h) + var(--safe-bottom)) !important;
+  }
+
+  .container {
+    width: 100% !important;
+    max-width: 100vw !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    overflow-x: hidden !important;
+  }
+}
+
+/* PWA standalone: push header below status bar */
+@media (display-mode: standalone) {
+  .header { padding-top: calc(12px + var(--safe-top)) !important; }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   HEADER — compact 3-column grid
+   col1: clock  col2: title  col3: user button
+══════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .header {
+    display: grid !important;
+    grid-template-columns: auto 1fr auto !important;
+    grid-template-rows: auto !important;
+    align-items: center !important;
+    gap: 0 8px !important;
+    padding: 10px 10px 8px !important;
+    text-align: left !important;
+    border-radius: 0 !important;
+  }
+
+  .user-clock {
+    position: static !important;
+    grid-column: 1 / 2 !important;
+    grid-row: 1 !important;
+    flex-direction: column !important;
+    padding: 3px 5px !important;
+    background: rgba(255,255,255,0.12) !important;
+    border-radius: 5px !important;
+    align-items: center !important;
+    gap: 1px !important;
+    white-space: nowrap !important;
+  }
+
+  .clock-time    { font-size: 12px !important; letter-spacing: 0 !important; }
+  .clock-info    { font-size: 8px !important; text-align: center !important; }
+  .clock-timezone{ font-size: 8px !important; }
+
+  .header h1 {
+    grid-column: 2 / 3 !important;
+    grid-row: 1 !important;
+    font-size: 13px !important;
+    margin: 0 !important;
+    text-align: center !important;
+    line-height: 1.2 !important;
+  }
+
+  .header p { display: none !important; }
+
+  .user-info {
+    position: static !important;
+    grid-column: 3 / 4 !important;
+    grid-row: 1 !important;
+    padding: 0 !important;
+    background: transparent !important;
+  }
+
+  /* Compact user button — avatar + badge only, hide text name */
+  .user-menu-btn {
+    padding: 5px 6px !important;
+    font-size: 10px !important;
+    gap: 3px !important;
+  }
+
+  /* The text node "Josh Schinkel" — target by excluding known non-text children */
+  .user-menu-btn .user-display-name { display: none !important; }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   MOTD BANNER
+══════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .motd-banner {
+    margin: 6px 8px !important;
+    border-radius: 8px !important;
+    padding: 8px 12px !important;
+  }
+  .motd-scrolling-content { font-size: 13px !important; }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   NAV — hide top bar, show bottom bar
+══════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .nav-tabs { display: none !important; }
+  #mobileBottomNav { display: flex !important; }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   CONTROLS / FILTER PANEL
+   Fix: force full-width column stack, prevent right-clip
+══════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .controls {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 10px 10px !important;
+    gap: 8px !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+  }
+
+  .controls > *,
+  .controls > form > * {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    margin-left: 0 !important;
+    flex: none !important;
+  }
+
+  .search-controls,
+  .team-filter-section {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    margin-left: 0 !important;
+  }
+
+  /* Search row: input stretches, buttons shrink */
+  .search-controls {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    gap: 6px !important;
+    align-items: center !important;
+  }
+
+  .search-controls input[type="text"] {
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+  }
+
+  .search-controls button {
+    flex: 0 0 auto !important;
+    white-space: nowrap !important;
+  }
+
+  .teamFilter,
+  #teamFilter {
+    width: 100% !important;
+    min-height: 120px !important;
+    max-height: 150px !important;
+    height: auto !important;  /* Allow content to determine height */
+  }
+
+  /* Keep tooltip from blowing out page width */
+  .tooltip {
+    min-width: 0 !important;
+    max-width: calc(100vw - 20px) !important;
+    width: auto !important;
+    left: 10px !important;
+    right: 10px !important;
+    transform: none !important;
+    top: auto !important;
+    bottom: calc(100% + 8px) !important;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   SCHEDULE TABLE
+   Fix: wrapper scrolls horizontally, override min-width 1000px
+══════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .schedule-wrapper {
+    overflow-x: auto !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    max-height: 68vh !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    /* Don't let this scroll container escape the page */
+    position: relative !important;
+  }
+
+  /* This is the key: override the hardcoded 1000px from index.php */
+  .schedule-table {
+    min-width: 560px !important;
+    width: max-content !important;
+  }
+
+  /* Employee name column: sticky + narrower */
+  .schedule-table th:first-child,
+  .schedule-table td:first-child {
+    width: 115px !important;
+    min-width: 115px !important;
+    max-width: 115px !important;
+    position: sticky !important;
+    left: 0 !important;
+    z-index: 50 !important;
+  }
+
+  /* Reduce padding in employee name cells to prevent icon overflow */
+  .employee-name {
+    padding-right: 8px !important;  /* Reduce from desktop's 32px */
+    padding-left: 4px !important;
+  }
+
+  .employee-actions-icons {
+    position: static !important;  /* Remove absolute positioning */
+    display: inline-flex !important;
+    margin-left: 4px !important;
+    vertical-align: middle !important;
+  }
+
+  .schedule-table th:first-child {
+    background: #1e40af !important;
+    z-index: 101 !important;  /* Higher than desktop sticky headers (100) */
+  }
+
+  .schedule-table td:first-child {
+    z-index: 101 !important;  /* Match header z-index to stay above other sticky elements */
+  }
+
+  .schedule-table td { font-size: 8px !important; padding: 3px 1px !important; }
+  .schedule-table th { font-size: 9px !important; padding: 5px 2px !important; }
+  .cell-content { min-height: 20px !important; }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   STATS BAR
+══════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .stats {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    padding: 8px !important;
+    gap: 6px !important;
+    overflow: hidden !important;
+  }
+
+  .stat-item {
+    flex: 1 1 calc(50% - 10px) !important;
+    min-width: 0 !important;
+    max-width: calc(50% - 6px) !important;
+    padding: 10px 8px !important;
+    box-sizing: border-box !important;
+  }
+
+  .stat-number { font-size: 1.2em !important; }
+  .stat-label  { font-size: 10px !important; }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   MODALS
+══════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .modal-content {
+    width: calc(100% - 16px) !important;
+    max-width: calc(100vw - 16px) !important;
+    margin: 8px auto !important;
+    padding: 16px !important;
+    max-height: 88vh !important;
+    overflow-y: auto !important;
+    border-radius: 12px !important;
+    box-sizing: border-box !important;
+  }
+
+  .edit-modal-content {
+    position: fixed !important;
+    bottom: 0 !important; left: 0 !important; right: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    border-radius: 16px 16px 0 0 !important;
+    padding: 20px 16px calc(16px + var(--safe-bottom)) !important;
+    margin: 0 !important;
+    max-height: 85vh !important;
+    overflow-y: auto !important;
+    box-sizing: border-box !important;
+  }
+
+  .edit-modal.show { align-items: flex-end !important; }
+
+  .status-btn {
+    flex: 1 1 calc(50% - 4px) !important;
+    min-width: 0 !important;
+    padding: 12px 6px !important;
+    font-size: 12px !important;
+    border-radius: 8px !important;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   FORMS — prevent iOS zoom
+══════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  input, select, textarea { font-size: 16px !important; }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   HEATMAP
+══════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .heatmap-container {
+    padding: 10px !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .time-grid {
+    grid-template-columns: 80px repeat(24, 22px) !important;
+    grid-template-rows: repeat(8, 28px) !important;
+  }
+
+  .heatmap-cell {
+    min-width: 22px !important;
+    min-height: 22px !important;
+    font-size: 8px !important;
+  }
+
+  .heatmap-stats { grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   ACTIVITY LOG + USER MENU
+══════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .activity-log-dropdown {
+    position: fixed !important;
+    bottom: calc(var(--bottom-nav-h) + var(--safe-bottom) + 8px) !important;
+    right: 8px !important; left: 8px !important;
+    width: auto !important; top: auto !important;
+    max-height: 55vh !important;
+    border-radius: 12px !important;
+  }
+
+  .user-menu-dropdown {
+    position: fixed !important;
+    bottom: calc(var(--bottom-nav-h) + var(--safe-bottom) + 8px) !important;
+    right: 8px !important; left: 8px !important;
+    top: auto !important;
+    min-width: unset !important; width: auto !important;
+    max-height: 72vh !important;
+    overflow-y: auto !important;
+    border-radius: 14px !important;
+    box-shadow: 0 -4px 24px rgba(0,0,0,0.25) !important;
+  }
+
+  .menu-item { padding: 14px 16px !important; font-size: 15px !important; }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   MISC TOUCH / UTILITY
+══════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  button:not(.mobile-nav-btn), .dropdown-item, .menu-item, .theme-option {
+    min-height: 44px !important;
+  }
+
+  .message {
+    margin: 6px 8px !important;
+    border-radius: 8px !important;
+    font-size: 13px !important;
+    box-sizing: border-box !important;
+  }
+
+  .back-to-top {
+    bottom: calc(var(--bottom-nav-h) + var(--safe-bottom) + 10px) !important;
+    right: 12px !important;
+    width: 44px !important; height: 44px !important;
+  }
+
+  .auto-notification {
+    top: auto !important;
+    bottom: calc(var(--bottom-nav-h) + var(--safe-bottom) + 10px) !important;
+    right: 8px !important; left: 8px !important;
+    font-size: 13px !important;
+  }
+
+  @media (hover: none) {
+    .employee-name:hover, .heatmap-cell:hover { transform: none !important; }
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   BOTTOM NAV BAR (hidden on desktop)
+══════════════════════════════════════════════════════════════════════════ */
+#mobileBottomNav {
+  display: none;
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: var(--bottom-nav-h);
+  padding-bottom: var(--safe-bottom);
+  background: #ecf0f1;
+  border-top: 1px solid #bdc3c7;
+  z-index: 8000;
+  align-items: stretch;
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.12);
+}
+
+.mobile-nav-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  background: none;
+  border: none;
+  border-top: 3px solid transparent;
+  padding: 5px 2px;
+  cursor: pointer;
+  color: #64748b;
+  font-size: 10px;
+  font-weight: 600;
+  min-height: 0 !important;
+  transition: color 0.15s;
+}
+
+.mobile-nav-btn .nav-icon { font-size: 22px; line-height: 1; }
+
+.mobile-nav-btn.active {
+  color: #06b6d4;
+  border-top-color: #06b6d4;
+  background: rgba(6,182,212,0.06);
+}
+
+.mobile-nav-btn:active { opacity: 0.7; transform: none !important; }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   PWA INSTALL BANNER
+══════════════════════════════════════════════════════════════════════════ */
+#pwaInstallBanner {
+  display: none;
+  position: fixed;
+  bottom: calc(var(--bottom-nav-h) + var(--safe-bottom) + 10px);
+  left: 10px; right: 10px;
+  background: #333399;
+  color: white;
+  border-radius: 14px;
+  padding: 12px 14px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  z-index: 7900;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  animation: slideUp 0.3s ease;
+}
+
+#pwaInstallBanner.show { display: flex !important; }
+#pwaInstallBanner .pwa-icon { font-size: 26px; flex-shrink: 0; }
+#pwaInstallBanner .pwa-text { flex: 1; line-height: 1.4; }
+#pwaInstallBanner .pwa-text strong { display: block; font-size: 14px; }
+#pwaInstallBanner .pwa-text small  { opacity: 0.8; font-size: 11px; }
+
+#pwaInstallBtn {
+  background: white; color: #333399;
+  border: none; padding: 7px 14px;
+  border-radius: 8px; font-weight: bold;
+  font-size: 12px; cursor: pointer;
+  min-height: 34px !important; flex-shrink: 0;
+}
+
+#pwaInstallDismiss {
+  background: none; border: none;
+  color: rgba(255,255,255,0.7);
+  font-size: 20px; cursor: pointer;
+  padding: 0 2px; min-height: 34px !important;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   LANDSCAPE
+══════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) and (orientation: landscape) {
+  :root { --bottom-nav-h: 50px; }
+  .header { padding: 6px 10px !important; }
+  .header h1 { font-size: 12px !important; }
+  .schedule-wrapper { max-height: 70vh !important; }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   SIDEBAR — hide on mobile, bottom nav handles navigation
+══════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .app-sidebar {
+    display: none !important;
+    width: 0 !important;
+  }
+
+  .app-body {
+    min-height: 0 !important;
+  }
+
+  .app-main {
+    width: 100% !important;
+    max-width: 100vw !important;
+    min-width: 0 !important;
+    overflow-x: hidden !important;
+    border-radius: 0 !important;
+    box-sizing: border-box !important;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   CONTROLS — tight 2-column grid for labels + selects
+   Keeps filters compact so the schedule table appears without scrolling
+══════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  /* The wrapping controls bar */
+  .controls {
+    padding: 8px 10px !important;
+    gap: 6px !important;
+    background: var(--card-bg, #fff) !important;
+    border-bottom: 1px solid var(--border-color, #dee2e6) !important;
+  }
+
+  /* Label + select pairs inside the form — 2 per row */
+  .controls form,
+  .controls > form {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 6px 10px !important;
+    width: 100% !important;
+    align-items: center !important;
+  }
+
+  /* Labels sit above their select */
+  .controls label {
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.4px !important;
+    color: var(--text-muted, #6c757d) !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    grid-column: auto !important;
+    align-self: end !important;
+  }
+
+  .controls select {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    font-size: 14px !important;
+    padding: 7px 8px !important;
+    height: 38px !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Search controls: full width row */
+  .search-controls {
+    grid-column: 1 / -1 !important;
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 6px !important;
+    align-items: center !important;
+    width: 100% !important;
+  }
+
+  .search-controls label {
+    display: none !important;   /* Hidden on mobile — placeholder says enough */
+  }
+
+  .search-controls input[type="text"] {
+    flex: 1 !important;
+    min-width: 0 !important;
+    font-size: 14px !important;
+    padding: 8px 10px !important;
+    height: 38px !important;
+    box-sizing: border-box !important;
+  }
+
+  .search-controls button {
+    flex-shrink: 0 !important;
+    height: 38px !important;
+    padding: 0 12px !important;
+    font-size: 13px !important;
+    white-space: nowrap !important;
+  }
+
+  /* Team filter: full-width collapsible multi-select */
+  .team-filter-section {
+    grid-column: 1 / -1 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+
+  .team-filter-section > form {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 6px !important;
+    grid-template-columns: unset !important;
+  }
+
+  .team-filter-section #teamFilter {
+    height: 90px !important;
+    min-height: 90px !important;
+    max-height: 90px !important;
+    font-size: 14px !important;
+  }
+
+  .team-filter-section .team-filter-buttons {
+    display: flex !important;
+    gap: 6px !important;
+  }
+
+  .team-filter-section button {
+    flex: 1 !important;
+    height: 36px !important;
+    font-size: 13px !important;
+  }
+
+  /* "display:contents" forms — target their direct select children */
+  .controls form[style*="contents"] select,
+  .controls form[style*="display: contents"] select {
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   STATS BAR — polished 2×2 grid, equal-size cards
+══════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .stats {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 6px !important;
+    padding: 8px 10px !important;
+  }
+
+  .stat-item {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    flex: none !important;
+    padding: 10px 10px 8px !important;
+    border-radius: 8px !important;
+    text-align: center !important;
+    box-sizing: border-box !important;
+  }
+
+  .stat-number {
+    font-size: 1.4em !important;
+    line-height: 1.1 !important;
+  }
+
+  .stat-label {
+    font-size: 9px !important;
+    line-height: 1.3 !important;
+    word-break: break-word !important;
+  }
+
+  /* Tooltip hint text below stat — hide to save space */
+  .stat-item > div:last-child:not(.stat-number):not(.stat-label) {
+    display: none !important;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   SECTION HEADINGS / "WORKING TODAY" CARD
+══════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  /* The working-today/heading row above the table */
+  .working-today-row,
+  [class*="section-header"],
+  .schedule-section-header {
+    padding: 6px 10px !important;
+    font-size: 13px !important;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   EMPLOYEE NAME HOVER CARD — prevent overflow on mobile
+══════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .employee-hover-card {
+    position: fixed !important;
+    left: 8px !important;
+    right: 8px !important;
+    bottom: calc(var(--bottom-nav-h) + var(--safe-bottom) + 10px) !important;
+    top: auto !important;
+    max-width: calc(100vw - 16px) !important;
+    width: auto !important;
+    z-index: 7000 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.2) !important;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   TAB CONTENT PADDING
+══════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .tab-content {
+    padding: 0 !important;
+  }
+
+  /* Remove any side padding that forces overflow */
+  .tab-content > * {
+    box-sizing: border-box !important;
+    max-width: 100vw !important;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   LANDSCAPE
+══════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) and (orientation: landscape) {
+  :root { --bottom-nav-h: 50px; }
+  .header { padding: 6px 10px !important; }
+  .header h1 { font-size: 12px !important; }
+  .schedule-wrapper { max-height: 70vh !important; }
+  .stats { grid-template-columns: repeat(4, 1fr) !important; }
+  .controls form { grid-template-columns: repeat(4, 1fr) !important; }
+}

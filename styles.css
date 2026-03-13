@@ -1,0 +1,5675 @@
+/* Schedule Management System v3.2 - Main Stylesheet
+
+   STRUCTURE:
+   1. Reset and Base Styles
+   2. Login Page Styles
+   3. Main Application Container
+   4. Header & Navigation
+   5. Forms & Controls
+   6. Schedule Display
+   7. [Lines 1-2464: Original styles.css content]
+   8. EXTRACTED PHP STYLES (lines 2465+):
+      - AUTH_USER_MANAGEMENT.PHP Block 2 (lines 2474-2650): Profile modal
+      - AUTH_USER_MANAGEMENT.PHP Block 1 (lines 2655-3250): User search, tables, animations
+      - INDEX.PHP (lines 3256-5266): Modals, MOTD, search, heatmap, sticky headers
+
+   IMPORTANT: CSS Variables (--card-bg, --text-color, etc.)
+   These are NOT defined in :root - they are dynamically injected by
+   the JavaScript ThemeSelector class. Fallback values ensure graceful
+   degradation. DO NOT add static :root declarations as it will break
+   the theme system.
+
+   ANIMATIONS INCLUDED:
+   - motd-scroll (MOTD banner scrolling animation)
+   - fadeIn (user search results)
+   - slideIn (user table rows)
+   - slideUpFadeIn (activity log dropdown)
+   - themeSwitch (theme change transitions)
+
+   CONFLICT RESOLUTION:
+   - .search-controls is scoped:
+     * .user-search-section .search-controls (vertical layout for user filters)
+     * .controls .search-controls (horizontal layout for schedule search)
+*/
+
+/* Reset and Base Styles */
+* { 
+    margin: 0; 
+    padding: 0; 
+    box-sizing: border-box; 
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: #0a0a0a;
+    padding: 20px;
+}
+
+/* Login Page Styles */
+.login-body {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.login-container {
+    background: white;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    width: 100%;
+    max-width: 400px;
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #333;
+}
+
+.login-btn {
+    width: 100%;
+    padding: 12px;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.login-btn:hover {
+    background: #0891b2;
+}
+
+.default-credentials {
+    background: #d1ecf1;
+    border: 1px solid #bee5eb;
+    color: #0c5460;
+    padding: 15px;
+    border-radius: 5px;
+    margin-top: 20px;
+    font-size: 12px;
+}
+
+/* Main Application Container */
+.container {
+    max-width: 1620px;
+    margin: 0 auto;
+    background: var(--card-bg, white);
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+/* ── Sidebar Layout ─────────────────────────────────────────── */
+.app-body {
+    display: flex;
+    flex: 1;
+    /* Ensure body fills remaining container height */
+    min-height: calc(100vh - 130px);
+    align-items: stretch;
+}
+
+/* Sidebar */
+.app-sidebar {
+    width: 210px;
+    flex-shrink: 0;
+    background: var(--sidebar-bg, #1e2a3a);
+    border-radius: 0 0 0 10px;
+    display: flex;
+    flex-direction: column;
+    padding: 12px 0 0;
+    /* Stretch to match the tallest tab content */
+    align-self: stretch;
+    /* Sticky so sidebar stays visible while scrolling */
+    position: sticky;
+    top: 0;
+    max-height: 100vh;
+    overflow-y: auto;
+}
+
+.app-sidebar::-webkit-scrollbar { width: 4px; }
+.app-sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 4px; }
+
+.sidebar-section-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.35);
+    padding: 12px 16px 5px;
+    display: block;
+}
+
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 9px 16px;
+    color: rgba(255,255,255,0.7);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    border-left: 3px solid transparent;
+    background: none;
+    width: 100%;
+    text-align: left;
+    text-decoration: none;
+    transition: background 0.14s, color 0.14s, border-color 0.14s;
+    font-family: inherit;
+    line-height: 1.3;
+}
+.sidebar-link .sb-icon {
+    font-size: 16px;
+    width: 20px;
+    text-align: center;
+    flex-shrink: 0;
+}
+.sidebar-link:hover {
+    color: #fff;
+}
+/* Remove the browser focus ring / hover-like highlight that sticks after a
+   mouse click on href="#" links. */
+.sidebar-link:focus {
+    outline: none;
+}
+.sidebar-link:focus:not(:focus-visible) {
+    background: transparent !important;
+    color: rgba(255,255,255,0.7) !important;
+}
+.sidebar-link.active:focus:not(:focus-visible) {
+    background: rgba(255,255,255,0.12) !important;
+    color: #fff !important;
+}
+.sidebar-link.active {
+    background: rgba(255,255,255,0.12);
+    color: #fff;
+    border-left-color: var(--primary-color, #06b6d4);
+    font-weight: 700;
+}
+.sidebar-link.danger { color: rgba(231,76,60,0.85); }
+.sidebar-link.danger:hover { background: rgba(231,76,60,0.12); color: #e74c3c; }
+
+.sidebar-divider {
+    height: 1px;
+    background: rgba(255,255,255,0.08);
+    margin: 8px 14px;
+}
+
+.sidebar-bottom {
+    margin-top: auto;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    padding-top: 6px;
+    padding-bottom: 8px;
+}
+
+/* Main content area (takes all remaining width) */
+.app-main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    background: var(--body-bg, #f8f9fa);
+    border-radius: 0 0 10px 0;
+    overflow-x: auto;
+    overflow-y: visible;
+}
+
+/* Hide the old horizontal nav-tabs when sidebar is present */
+.with-sidebar .nav-tabs {
+    display: none;
+}
+
+/* ── Sidebar text always white, immune to theme overrides ── */
+.app-sidebar,
+.app-sidebar *,
+.app-sidebar .sidebar-section-label,
+.app-sidebar .sidebar-link,
+.app-sidebar .sidebar-link:hover,
+.app-sidebar a,
+.app-sidebar button,
+.app-sidebar div {
+    color: rgba(255,255,255,0.75) !important;
+    text-shadow: none !important;
+    background-color: transparent !important;
+    border-color: transparent !important;
+}
+/* Active link gets full white */
+.app-sidebar .sidebar-link.active,
+.app-sidebar .sidebar-link.active * {
+    color: #ffffff !important;
+}
+/* Hover — text brightens but background stays transparent (matches sidebar,
+   theme-aware, and prevents any stuck-hover artefact) */
+.app-sidebar .sidebar-link:hover,
+.app-sidebar .sidebar-link:hover * {
+    color: #ffffff !important;
+}
+/* Suppress sticky focus highlight after mouse click on href="#" links */
+.app-sidebar .sidebar-link:focus:not(:focus-visible),
+.app-sidebar .sidebar-link:focus:not(:focus-visible) * {
+    outline: none !important;
+    background-color: transparent !important;
+    color: rgba(255,255,255,0.7) !important;
+}
+.app-sidebar .sidebar-link.active:focus:not(:focus-visible),
+.app-sidebar .sidebar-link.active:focus:not(:focus-visible) * {
+    background-color: rgba(255,255,255,0.12) !important;
+    color: #ffffff !important;
+}
+/* Logout link stays red-ish */
+.app-sidebar .sidebar-link[href*="logout"],
+.app-sidebar .sidebar-link[href*="logout"] * {
+    color: rgba(255,120,100,0.9) !important;
+}
+/* Sidebar background always dark — not overridden by theme button rules */
+.app-sidebar {
+    background: var(--sidebar-bg, #1e2a3a) !important;
+}
+/* Active left border accent */
+.app-sidebar .sidebar-link.active {
+    border-left-color: var(--primary-color, #06b6d4) !important;
+    background: rgba(255,255,255,0.12) !important;
+}
+/* Section labels slightly dimmer */
+.app-sidebar .sidebar-section-label {
+    color: rgba(255,255,255,0.35) !important;
+}
+/* Dividers */
+.app-sidebar .sidebar-divider {
+    background: rgba(255,255,255,0.08) !important;
+    height: 1px !important;
+}
+
+/* tab-content inside sidebar layout stays block when active */
+.app-main .tab-content.active {
+    display: block;
+}
+
+@media (max-width: 768px) {
+    .app-sidebar { width: 52px; }
+    .app-sidebar .sidebar-section-label,
+    .app-sidebar .sidebar-link span:not(.sb-icon) { display: none; }
+    .sidebar-link { justify-content: center; padding: 10px 0; border-left: none; border-bottom: 3px solid transparent; }
+    .sidebar-link.active { border-bottom-color: var(--primary-color, #06b6d4); }
+}
+
+/* Header Styles */
+.header {
+    background: #333399;
+    color: white;
+    padding: 20px;
+    text-align: center;
+    border-radius: 10px 10px 0 0;
+    position: relative;
+}
+
+.user-info {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 12px;
+    background: rgba(255,255,255,0.1);
+    padding: 8px 12px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.user-info .role-badge {
+    background: #0891b2;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 10px;
+    margin-left: 5px;
+}
+
+.user-info .role-admin { background: #dc2626; }
+.user-info .role-manager { background: #f59e0b; }
+.user-info .role-supervisor { background: #06b6d4; }
+.user-info .role-employee { background: #0891b2; }
+
+/* User Timezone Clock Styles */
+.user-clock {
+    position: absolute;
+    top: 10px;
+    left: 15px;
+    font-size: 12px;
+    background: rgba(255,255,255,0.1);
+    padding: 8px 12px;
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+.clock-time {
+    font-size: 16px;
+    font-weight: bold;
+    color: #ecf0f1;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    letter-spacing: 0.5px;
+    font-family: 'Courier New', monospace;
+}
+
+.clock-info {
+    font-size: 9px;
+    color: #bdc3c7;
+    text-align: center;
+    line-height: 1.2;
+}
+
+.clock-timezone {
+    color: #06b6d4;
+    font-weight: bold;
+}
+
+/* Session timeout indicator */
+.session-info {
+    font-size: 8px;
+    color: rgba(255,255,255,0.7);
+    margin-top: 2px;
+    text-align: center;
+}
+
+/* Activity Log Styles */
+.activity-log-btn {
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: white;
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.3s;
+    position: relative;
+}
+
+.activity-log-btn:hover {
+    background: rgba(255,255,255,0.25);
+}
+
+.activity-log-btn .badge {
+    background: #dc2626;
+    color: white;
+    font-size: 9px;
+    padding: 2px 5px;
+    border-radius: 10px;
+    margin-left: 3px;
+}
+
+.activity-log-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    z-index: 1500 !important; /* FIXED: Increased from 1000 to 1500 */
+    display: none;
+    width: 450px;
+    max-height: 400px;
+    overflow: hidden;
+}
+
+.activity-log-dropdown.show {
+    display: block;
+}
+
+.activity-log-header {
+    background: #1e40af;
+    color: white;
+    padding: 12px 15px;
+    font-weight: bold;
+    font-size: 13px;
+    border-radius: 8px 8px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.activity-log-content {
+    max-height: 350px;
+    overflow-y: auto;
+}
+
+.activity-log-item {
+    padding: 12px 15px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    transition: background 0.2s;
+}
+
+.activity-log-item:hover {
+    background: #f8f9fa;
+}
+
+.activity-log-item:last-child {
+    border-bottom: none;
+}
+
+.activity-icon {
+    font-size: 16px;
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+.activity-details {
+    flex: 1;
+    font-size: 12px;
+}
+
+.activity-action {
+    font-weight: bold;
+    color: #1e3a8a;
+    margin-bottom: 3px;
+}
+
+.activity-description {
+    color: #666;
+    line-height: 1.4;
+    margin-bottom: 5px;
+}
+
+.activity-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 10px;
+    color: #999;
+}
+
+.activity-user {
+    font-weight: bold;
+    color: #06b6d4;
+}
+
+.activity-time {
+    color: #7f8c8d;
+}
+
+.activity-empty {
+    padding: 30px;
+    text-align: center;
+    color: #666;
+    font-style: italic;
+}
+
+/* Form Controls */
+.controls {
+    padding: 15px 20px 15px 20px;
+    background: #ecf0f1;
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+select, button, input {
+    padding: 8px 12px;
+    border: 1px solid #bdc3c7;
+    border-radius: 4px;
+    background: white;
+    cursor: pointer;
+}
+
+button {
+    background: #06b6d4;
+    color: white;
+    border-color: #06b6d4;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn-green { background: #0891b2 !important; }
+.btn-orange { background: #ea580c !important; }
+.btn-purple { background: #7c3aed !important; }
+.btn-red { background: #dc2626 !important; }
+
+/* Navigation Tabs */
+.nav-tabs {
+    display: flex;
+    background: #ecf0f1;
+    border-bottom: 1px solid #bdc3c7;
+}
+
+.nav-tab {
+    padding: 15px 25px;
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    cursor: pointer;
+    font-size: 14px;
+    color: #1e3a8a;
+    transition: all 0.3s;
+}
+
+.nav-tab.active {
+    background: white;
+    border-bottom-color: #06b6d4;
+    color: #06b6d4;
+}
+
+.nav-tab:hover {
+    background: #d5dbdb;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* Schedule Display */
+.schedule-wrapper {
+    padding: 1px;
+    overflow-x: visible; /* Changed from auto to prevent horizontal scroll */
+    max-height: 80vh;
+    overflow-y: auto;
+    width: 100%;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 40px;
+    color: #666;
+}
+
+.schedule-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed; /* Make columns equal width */
+    position: relative;
+}
+
+/* Ensure horizontal scroll on mobile */
+@media (max-width: 768px) {
+    .schedule-wrapper {
+        overflow-x: auto !important;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch !important;  /* Smooth iOS scrolling */
+    }
+}
+
+.schedule-table th {
+    background: #1e40af;
+    color: white;
+    padding: 8px 3px; /* Reduced padding */
+    text-align: center;
+    font-size: 10px; /* Slightly smaller font */
+    border: 1px solid #1e3a8a;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    white-space: nowrap; /* Prevent text wrapping */
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.schedule-table th:first-child {
+    width: 180px; /* Reduced from 210px */
+    text-align: left;
+    min-width: 180px; /* Ensure employee names stay readable */
+}
+
+.schedule-table td {
+    padding: 6px 2px; /* Reduced padding for more compact cells */
+    text-align: center;
+    font-size: 8px; /* Slightly smaller font */
+    font-weight: bold;
+    border: 1px solid #bdc3c7;
+    cursor: pointer;
+    position: relative;
+    vertical-align: middle;
+    color: #1e293b; /* default - overridden by theme CSS */
+    overflow: hidden; /* Prevent content overflow */
+    text-overflow: ellipsis; /* Add ellipsis for long text */
+}
+
+.cell-content {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 25px; /* Reduced from 30px */
+}
+
+.status-text {
+    font-weight: bold;
+    color: #fff !important;
+}
+
+/* Comment indicator - small dot that appears when there's a comment */
+.has-comment::after {
+    content: '💬';
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    font-size: 8px;
+    opacity: 0.7;
+}
+
+/* Employee Name Styling */
+.employee-name {
+    background: #95a5a6;
+    color: white;
+    text-align: left !important;
+    font-size: 11px;
+    cursor: default;
+    position: relative;
+    padding-right: 32px;
+}
+
+.employee-name.own-employee {
+    background: #0891b2 !important;
+    border-left: 4px solid #1e8449;
+}
+
+.employee-name.own-employee .team-info {
+    opacity: 1;
+    font-weight: bold;
+}
+
+.own-employee-cell {
+    border: 2px solid #0891b2 !important;
+    box-shadow: 0 0 3px rgba(39, 174, 96, 0.3);
+}
+
+.own-employee-cell:hover {
+    background: #e8f8f5 !important;
+    transform: scale(1.02);
+    transition: all 0.2s ease;
+}
+
+.non-editable-cell {
+    cursor: not-allowed !important;
+    opacity: 0.7;
+}
+
+.employee-indicator {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    font-size: 8px;
+    background: #0891b2;
+    color: white;
+    padding: 1px 3px;
+    border-radius: 2px;
+    font-weight: bold;
+}
+
+.employee-actions {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+}
+
+.team-info {
+    font-size: 9px;
+    opacity: 0.8;
+}
+
+.level-info {
+    font-size: 8px;
+    opacity: 0.9;
+    color: #ecf0f1;
+    font-weight: bold;
+    background: rgba(0,0,0,0.1);
+    padding: 1px 4px;
+    border-radius: 2px;
+    margin-top: 1px;
+}
+
+.supervisor-info {
+    font-size: 8px;
+    opacity: 0.7;
+    color: var(--text-muted, #555555);
+    margin-top: 2px;
+}
+
+.actions-btn {
+    background: #1e40af;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    width: 25px;
+    height: 16px;
+    font-size: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.actions-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    min-width: 120px;
+    display: none;
+    z-index: 9999; /* Add this line or increase existing z-index */
+}
+
+.actions-dropdown.show {
+    display: block;
+}
+
+.dropdown-item {
+    padding: 6px 10px;
+    font-size: 11px;
+    color: #333;
+    cursor: pointer;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.dropdown-item:hover {
+    background: #669999;
+}
+
+.dropdown-item.edit {
+    color: #06b6d4;
+}
+
+.dropdown-item.delete {
+    color: #dc2626;
+}
+
+/* Status Colors */
+.status-on { background: #4B59B4; }
+.status-off { background: #10598A; }
+.status-pto { background: #E76418; }
+.status-sick { background: #dc3545; }
+.status-holiday { background: #28D765; }
+.status-custom_hours { background: #714BB4; }
+.status-schedule { background: #3730a3; }
+
+/* Today's date highlighting */
+.today-header {
+    background: #ff6b35 !important;
+    color: white !important;
+    position: relative;
+    padding-bottom: 15px !important;
+}
+
+.today-header::after {
+    content: 'TODAY';
+    position: absolute;
+    bottom: 2px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 7px;
+    background: #e55a2b;
+    color: white;
+    padding: 1px 3px;
+    border-radius: 3px;
+    white-space: nowrap;
+    border: 1px solid rgba(255,255,255,0.3);
+    font-weight: bold;
+    letter-spacing: 0.3px;
+}
+
+.today-cell {
+    background: linear-gradient(135deg, #fff3e0 0%, #ffe0b3 100%) !important;
+    border: 2px solid #ff6b35 !important;
+    box-shadow: 0 0 8px rgba(255, 107, 53, 0.3);
+    /* Always force dark text — today cell is always light orange regardless of theme */
+    color: #1a1a1a !important;
+}
+
+.today-cell .status-text {
+    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    color: #1a1a1a !important;
+}
+
+/* Status badges inside today cell still need readable colors */
+.today-cell .status-on,
+.today-cell .status-pto,
+.today-cell .status-sick,
+.today-cell .status-holiday,
+.today-cell .status-custom_hours,
+.today-cell .status-schedule {
+    color: white !important;
+}
+
+/* Team Colors */
+.team-tams { background: #93c5fd; }
+.team-esg { background: #60a5fa; }
+.team-support { background: #a78bfa; }
+.team-windows { background: #c084fc; color: #6E18B9; }
+.team-security { background: #3b82f6; }
+.team-supervisor { background: #a855f7; }
+.team-onboarding { background: #c084fc; }
+.team-migrations { background: #7c3aed; }
+.team-managers { background: #1e40af; }
+
+/* Level Colors */
+.level- { display: none !important; } /* Hide empty level badges */
+.level-ssa  { background: #dc2626 !important; }
+.level-ssa2 { background: #9b59b6 !important; }
+.level-l1   { background: #06b6d4 !important; }
+.level-l2   { background: #f59e0b !important; }
+.level-l3   { background: #0891b2 !important; }
+.level-tam  { background: #f97316 !important; }
+.level-tam2 { background: #ea580c !important; }
+.level-manager    { background: #7c3aed !important; }
+.level-Supervisor { background: #0369a1 !important; }
+.level-SR--Supervisor  { background: #0f766e !important; }
+.level-SR--Manager     { background: #c2410c !important; }
+.level-IMP-Tech        { background: #1d4ed8 !important; }
+.level-IMP-Coordinator { background: #6d28d9 !important; }
+.level-SecOps-T1       { background: #1a56db !important; }
+.level-SecOps-T2       { background: #7e3af2 !important; }
+.level-SecOps-T3       { background: #e74694 !important; }
+.level-SecEng          { background: #d61f69 !important; }
+.level-technical_writer { background: #0d9488 !important; }
+.level-trainer    { background: #16a34a !important; }
+.level-tech_coach { background: #0284c7 !important; }
+
+/* Statistics Section */
+.stats {
+    padding: 20px;
+    background: #ecf0f1;
+    display: flex;
+    justify-content: space-around;
+    text-align: center;
+}
+
+.stat-item {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.stat-number {
+    font-size: 1.5em;
+    font-weight: bold;
+    color: var(--primary-color, #1e3a8a);
+}
+
+.stat-label {
+    font-size: 12px;
+    color: var(--text-color, #333333);
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+}
+
+.modal.show {
+    display: block !important;
+}
+
+.modal-content {
+    background: white;
+    margin: 5% auto;
+    padding: 30px;
+    border-radius: 10px;
+    width: 500px;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+/* Form Groups */
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.form-group input, .form-group select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+/* Schedule Grid */
+.schedule-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+    text-align: center;
+    margin-top: 10px;
+}
+
+.schedule-grid div {
+    padding: 5px;
+}
+
+.template-btns {
+    margin-top: 10px;
+}
+
+.template-btns button {
+    font-size: 11px;
+    padding: 4px 8px;
+    margin: 2px;
+}
+
+/* Template Management Styles */
+.template-section {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+    padding: 15px;
+    margin-bottom: 15px;
+}
+
+.template-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+.template-toggle {
+    background: none;
+    border: none;
+    color: #007bff;
+    cursor: pointer;
+    font-size: 12px;
+    text-decoration: underline;
+}
+
+.template-toggle:hover {
+    color: #0056b3;
+}
+
+.template-controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.template-list {
+    max-height: 120px;
+    overflow-y: auto;
+    border: 1px solid #e9ecef;
+    border-radius: 3px;
+    background: white;
+}
+
+.template-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 10px;
+    border-bottom: 1px solid #eee;
+    font-size: 12px;
+}
+
+.template-item:last-child {
+    border-bottom: none;
+}
+
+.template-item:hover {
+    background: #f8f9fa;
+}
+
+.template-info {
+    flex: 1;
+}
+
+.template-name {
+    font-weight: bold;
+    color: #1e3a8a;
+}
+
+.template-description {
+    color: #666;
+    margin-top: 2px;
+}
+
+.template-meta {
+    color: #999;
+    font-size: 10px;
+    margin-top: 2px;
+}
+
+.template-delete-btn {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-size: 10px;
+    cursor: pointer;
+}
+
+.template-delete-btn:hover {
+    background: #c82333;
+}
+
+.template-save-btn {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 3px;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.template-save-btn:hover {
+    background: #218838;
+}
+
+.template-clear-btn {
+    background: #6c757d;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 3px;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.template-clear-btn:hover {
+    background: #5a6268;
+}
+
+/* Messages */
+.message {
+    padding: 10px 15px;
+    margin: 10px 0;
+    border-radius: 5px;
+    transition: opacity 0.5s ease, max-height 0.5s ease, padding 0.5s ease, margin 0.5s ease;
+    overflow: hidden;
+}
+.message.fade-out {
+    opacity: 0;
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.message.success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.message.error {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.message.warning {
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeaa7;
+}
+
+.message.info {
+    background: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+}
+
+/* Edit cell modal */
+.edit-modal {
+    background: rgba(0,0,0,0.5);
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2000;
+    display: none;
+}
+
+.edit-modal.show {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.edit-modal-content {
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    max-width: 550px;
+    width: 90%;
+}
+
+#editInfo {
+    margin-bottom: 15px;
+}
+
+.warning-text {
+    background: #fff3cd;
+    border: 1px solid #ffeaa7;
+    color: #856404;
+    padding: 8px 12px;
+    border-radius: 4px;
+    margin: 10px 0;
+}
+
+.status-buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin: 15px 0;
+}
+
+.status-btn {
+    padding: 8px 12px;
+    border: 2px solid transparent; /* permanent baseline — no JS needed to reset */
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    color: white;
+}
+
+/* Active state: user just clicked this button */
+.status-btn.status-btn-active {
+    border-color: #333;
+}
+
+/* Current state: pre-existing override highlighted on modal open */
+.status-btn.status-btn-current {
+    border-color: #999;
+}
+
+.custom-hours-input {
+    display: none;
+    margin-top: 10px;
+}
+
+.custom-hours-input input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 13px;
+}
+
+/* Backup section */
+.backup-section {
+    margin: 20px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+}
+
+.backup-toggle {
+    background: #4B59B4;
+    border: none;
+    color: #ffffff;
+    cursor: pointer;
+    font-size: 14px;
+    text-decoration: underline;
+}
+
+.backup-list {
+    display: none;
+    margin-top: 15px;
+}
+
+.backup-list.show {
+    display: block;
+}
+
+.backup-item {
+    padding: 8px 12px;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.backup-info {
+    font-size: 12px;
+    color: #666;
+}
+
+.backup-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+/* Tooltip for Working Today - FIXED Z-INDEX */
+.stat-item.has-tooltip {
+    position: relative;
+    cursor: pointer;
+}
+
+.tooltip {
+    position: absolute;
+    top: 0;
+    left: 100%;
+    margin-left: 15px;
+    background: #1a2e4a;   /* deep navy — always readable in every theme */
+    color: #ffffff !important;
+    padding: 15px 18px;
+    border-radius: 8px;
+    font-size: 12px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s;
+    z-index: 1500 !important;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.35);
+    max-width: 350px;
+    min-width: 200px;
+    white-space: normal;
+    line-height: 1.5;
+    border: 1px solid rgba(255,255,255,0.15);
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.tooltip::before {
+    content: '';
+    position: absolute;
+    top: 20px;
+    left: -6px;
+    border: 6px solid transparent;
+    border-right-color: #1a2e4a;
+}
+
+.stat-item.has-tooltip:hover .tooltip {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Raise specificity so these beat .tab-content span rules in theme CSS */
+.stat-item .tooltip .tooltip-header {
+    font-weight: bold;
+    font-size: 13px;
+    color: #ffffff !important;
+    margin-bottom: 12px;
+    text-align: center;
+    border-bottom: 1px solid rgba(255,255,255,0.3);
+    padding-bottom: 8px;
+}
+
+.stat-item .tooltip .tooltip-team {
+    font-weight: bold;
+    color: #ffffff !important;
+    margin-top: 12px;
+    margin-bottom: 4px;
+    font-size: 12px;
+}
+
+.stat-item .tooltip .tooltip-team:first-child {
+    margin-top: 0;
+}
+
+.stat-item .tooltip .tooltip-employees {
+    margin-left: 12px;
+    color: #ffffff !important;
+    line-height: 1.4;
+    font-size: 11px;
+    margin-bottom: 2px;
+}
+
+/* Catch all spans/text inside any tooltip popout.
+   Three-class specificity (0-3-0) beats every dynamic theme rule. */
+.stat-item.has-tooltip .tooltip,
+.stat-item.has-tooltip .tooltip *,
+.stat-item.has-tooltip .tooltip small,
+.stat-item.has-tooltip .tooltip span,
+.stat-item.has-tooltip .tooltip div {
+    color: #ffffff !important;
+}
+
+.tooltip-empty {
+    color: #95a5a6;
+    font-style: italic;
+    text-align: center;
+    margin-top: 8px;
+}
+
+/* User Management Table */
+.users-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.users-table th, .users-table td {
+    padding: 5px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+
+.permission-denied {
+    text-align: center;
+    padding: 40px;
+    color: #dc2626;
+    background: #fdf2f2;
+    border-radius: 8px;
+    margin: 20px;
+}
+
+/* Bulk operations enhancements */
+.bulk-employee-list {
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    padding: 10px;
+    border-radius: 4px;
+    background: #f9f9f9;
+}
+
+.bulk-employee-item {
+    margin-bottom: 5px;
+    padding: 3px 0;
+}
+
+.bulk-employee-item label {
+    font-weight: normal !important;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.bulk-warning {
+    background: #fff3cd;
+    border: 1px solid #ffeaa7;
+    color: #856404;
+    padding: 10px;
+    border-radius: 4px;
+    margin: 15px 0;
+    font-size: 12px;
+}
+
+/* Auto notification styles */
+.auto-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 12px 20px;
+    border-radius: 5px;
+    font-size: 14px;
+    font-weight: bold;
+    z-index: 1000;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    transition: all 0.3s ease;
+}
+
+/* Session timeout modal styles */
+.session-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.7);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.session-modal-content {
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    text-align: center;
+    max-width: 400px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+}
+
+/* Profile Card Styles - Add this to your styles.css */
+
+/* Profile Card */
+.profile-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    overflow: hidden;
+    margin: 20px;
+    border: 1px solid #e1e8ed;
+    transition: box-shadow 0.3s ease;
+}
+
+.profile-card:hover {
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+}
+
+.profile-header {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    color: white;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    position: relative;
+}
+
+.profile-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: bold;
+    color: white;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    border: 3px solid rgba(255,255,255,0.3);
+}
+
+.profile-info {
+    flex: 1;
+}
+
+.profile-info h3 {
+    margin: 0 0 8px 0;
+    font-size: 20px;
+    font-weight: bold;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+}
+
+.profile-info .role-badge {
+    background: rgba(255,255,255,0.2);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 15px;
+    font-size: 12px;
+    font-weight: bold;
+    border: 1px solid rgba(255,255,255,0.3);
+}
+
+.profile-edit-btn {
+    background: rgba(255,255,255,0.2);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.3s ease;
+    position: absolute;
+    top: 15px;
+    right: 15px;
+}
+
+.profile-edit-btn:hover {
+    background: rgba(255,255,255,0.3);
+    transform: translateY(-2px);
+}
+
+.profile-details {
+    padding: 20px;
+}
+
+.profile-field {
+    display: flex;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.profile-field:last-child {
+    border-bottom: none;
+}
+
+.field-label {
+    font-weight: bold;
+    color: #555;
+    min-width: 140px;
+    font-size: 13px;
+}
+
+.field-value {
+    color: #333;
+    font-size: 13px;
+    flex: 1;
+}
+
+.field-value.no-link {
+    color: #999;
+    font-style: italic;
+}
+
+/* Employee Link Section */
+.employee-link {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 15px;
+    margin-top: 15px;
+    border: 1px solid #e9ecef;
+}
+
+.employee-link-header {
+    margin-bottom: 10px;
+}
+
+.employee-details {
+    margin-left: 15px;
+}
+
+.employee-name {
+    font-weight: bold;
+    color: #1e3a8a;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.employee-info {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.team-badge {
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: bold;
+    color: white;
+}
+
+.team-badge.team-tams { background: #93c5fd; }
+.team-badge.team-esg { background: #60a5fa; }
+.team-badge.team-support { background: #a78bfa; }
+.team-badge.team-windows { background: #c084fc; }
+.team-badge.team-security { background: #3b82f6; }
+.team-badge.team-supervisor { background: #a855f7; }
+.team-badge.team-onboarding { background: #c084fc; }
+.team-badge.team-migrations { background: #7c3aed; }
+.team-badge.team-manager { background: #1e40af; }
+.team-badge.team-implementations { background: #0891b2; }
+.team-badge.team-account-services { background: #dc2626; }
+
+.shift-info {
+    background: var(--primary-color, #17a2b8);
+    color: white;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: bold;
+}
+
+.hours-info {
+    background: #28a745;
+    color: white;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: bold;
+}
+
+.level-badge {
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: bold;
+    color: white;
+}
+
+.level-badge.level-ssa  { background: #dc2626; }
+.level-badge.level-ssa2 { background: #9b59b6; }
+.level-badge.level-l1   { background: #06b6d4; }
+.level-badge.level-l2   { background: #f59e0b; }
+.level-badge.level-l3   { background: #0891b2; }
+.level-badge.level-tam  { background: #f97316; }
+.level-badge.level-tam2 { background: #ea580c; }
+.level-badge.level-manager    { background: #7c3aed; }
+.level-badge.level-Supervisor { background: #0369a1; }
+.level-badge.level-technical_writer { background: #0d9488; }
+.level-badge.level-trainer    { background: #16a34a; }
+.level-badge.level-tech_coach { background: #0284c7; }
+
+/* Profile Modal */
+.profile-modal {
+    max-width: 500px;
+}
+
+.password-section {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    margin: 20px 0;
+    border: 1px solid #e9ecef;
+}
+
+.password-section h4 {
+    margin: 0 0 10px 0;
+    color: #495057;
+    font-size: 16px;
+}
+
+.form-note {
+    font-size: 12px;
+    color: #6c757d;
+    margin-top: 4px;
+    font-style: italic;
+}
+
+.btn-primary {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.3s ease;
+}
+
+.btn-primary:hover {
+    background: #0056b3;
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-left: 10px;
+    transition: background 0.3s ease;
+}
+
+.btn-secondary:hover {
+    background: #545b62;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .profile-card {
+        margin: 10px;
+    }
+    
+    .profile-header {
+        padding: 15px;
+        flex-direction: column;
+        text-align: center;
+        gap: 10px;
+    }
+    
+    .profile-edit-btn {
+        position: static;
+        margin-top: 10px;
+    }
+    
+    .profile-field {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+    
+    .field-label {
+        min-width: auto;
+    }
+    
+    .employee-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+}
+
+/* Enhanced Profile System CSS - Add this to your existing styles.css */
+
+/* Profile Photo Styles */
+.profile-photo-img {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid rgba(255,255,255,0.3);
+}
+
+.current-photo-container {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.current-photo {
+    position: relative;
+}
+
+.current-photo img {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #ddd;
+}
+
+.photo-placeholder {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: #3b82f6;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: bold;
+    border: 2px solid #ddd;
+}
+
+.photo-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.photo-upload-btn {
+    background: #06b6d4;
+    color: white;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 12px;
+    text-align: center;
+    transition: background 0.3s;
+    border: none;
+    display: inline-block;
+}
+
+.photo-upload-btn:hover {
+    background: #2980b9;
+}
+
+.photo-delete-btn {
+    background: #dc2626;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 12px;
+    text-align: center;
+    transition: background 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.photo-delete-btn:hover {
+    background: #c0392b;
+}
+
+.photo-delete-btn input[type="checkbox"] {
+    margin: 0;
+}
+
+/* User Photo in Table */
+.user-photo-small {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.user-photo-img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #ddd;
+}
+
+.user-photo-placeholder {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #95a5a6;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: bold;
+    border: 2px solid #ddd;
+}
+
+/* Profile Modal Enhancements */
+.profile-modal {
+    max-width: 600px;
+}
+
+.profile-modal .modal-content {
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+/* Profile Viewer Modal */
+#profileViewerModal .modal-content {
+    max-width: 800px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+#selectedUserProfile {
+    min-height: 200px;
+    border: 1px solid #e1e8ed;
+    border-radius: 8px;
+    padding: 20px;
+    background: #f8f9fa;
+}
+
+/* Enhanced Profile Card for Admin View */
+.admin-profile-view {
+    background: #fff3cd;
+    border: 1px solid #ffeaa7;
+    border-radius: 8px;
+    padding: 15px;
+    margin: 15px 0;
+}
+
+.admin-profile-view h4 {
+    color: #856404;
+    margin: 0 0 10px 0;
+    font-size: 14px;
+}
+
+.admin-profile-view p {
+    color: #856404;
+    margin: 0;
+    font-size: 12px;
+}
+
+/* Enhanced User Table */
+.users-table th:first-child,
+.users-table td:first-child {
+    width: 60px;
+    text-align: center;
+}
+
+/* Photo Preview Styles */
+.photo-preview {
+    position: relative;
+    display: inline-block;
+}
+
+.photo-preview-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.7);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 12px;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.photo-preview:hover .photo-preview-overlay {
+    opacity: 1;
+}
+
+/* Loading States */
+.photo-uploading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.photo-uploading::after {
+    content: '⟳';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 20px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: translate(-50%, -50%) rotate(0deg); }
+    to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Error States */
+.photo-error {
+    border: 2px solid #dc2626 !important;
+}
+
+.photo-error-message {
+    color: #dc2626;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+/* Success States */
+.photo-success {
+    border: 2px solid #0891b2 !important;
+}
+
+/* Profile Card Enhanced Styles */
+.profile-card .profile-avatar {
+    position: relative;
+    overflow: hidden;
+}
+
+.profile-card .profile-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Admin Profile Management Buttons */
+.profile-management-actions {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 15px;
+    margin: 20px 0;
+    text-align: center;
+}
+
+.profile-management-actions h4 {
+    margin: 0 0 15px 0;
+    color: #495057;
+}
+
+.profile-management-actions .btn {
+    margin: 0 5px;
+}
+
+/* Responsive Design for Profile Photos */
+@media (max-width: 768px) {
+    .current-photo-container {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+    
+    .photo-actions {
+        align-items: center;
+        width: 100%;
+    }
+    
+    .profile-modal {
+        max-width: 95%;
+        margin: 10px;
+    }
+    
+    .users-table {
+        font-size: 12px;
+    }
+    
+    .user-photo-small,
+    .user-photo-img,
+    .user-photo-placeholder {
+        width: 30px;
+        height: 30px;
+    }
+    
+    .user-photo-placeholder {
+        font-size: 12px;
+    }
+}
+
+/* Enhanced Form Styles for Profile Management */
+.profile-form-section {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 20px 0;
+}
+
+.profile-form-section h4 {
+    margin: 0 0 15px 0;
+    color: #495057;
+    border-bottom: 1px solid #dee2e6;
+    padding-bottom: 10px;
+}
+
+/* User Selector Styles */
+#userSelect {
+    background: white;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    padding: 8px 12px;
+    font-size: 14px;
+    color: #495057;
+}
+
+#userSelect:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+    outline: 0;
+}
+
+/* Permission Indicators */
+.permission-indicator {
+    display: inline-block;
+    background: var(--primary-color, #17a2b8);
+    color: white;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 10px;
+    margin-left: 5px;
+}
+
+.permission-indicator.admin {
+    background: #dc3545;
+}
+
+.permission-indicator.manager {
+    background: #fd7e14;
+}
+
+.permission-indicator.supervisor {
+    background: #20c997;
+}
+
+/* Enhanced Tooltips for Profile Features */
+.profile-tooltip {
+    position: relative;
+    cursor: help;
+}
+
+.profile-tooltip:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #333;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: nowrap;
+    z-index: 1000;
+    margin-bottom: 5px;
+}
+
+.profile-tooltip:hover::before {
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: #333;
+    z-index: 1000;
+}
+
+/* Print Styles for Profile Cards */
+@media print {
+    .profile-edit-btn,
+    .photo-actions,
+    .profile-management-actions {
+        display: none !important;
+    }
+    
+    .profile-card {
+        break-inside: avoid;
+        box-shadow: none;
+        border: 1px solid #333;
+    }
+}
+
+/* Employee Hover Card Styles - FIXED Z-INDEX */
+.employee-hover-card {
+    position: fixed;
+    width: 320px;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    z-index: 1500 !important; /* FIXED: Increased from 2000 to 1500 to be above sticky header */
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: all 0.2s ease;
+    pointer-events: none;
+    font-size: 12px;
+    overflow: hidden;
+}
+
+.employee-hover-card.visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.employee-card-header {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    color: white;
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.employee-card-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: rgba(255,255,255,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid rgba(255,255,255,0.3);
+}
+
+.employee-card-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.employee-card-initials {
+    font-size: 18px;
+    font-weight: bold;
+    color: white !important;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+}
+
+.employee-card-info {
+    flex: 1;
+}
+
+.employee-card-name {
+    margin: 0 0 5px 0;
+    font-size: 16px;
+    font-weight: bold;
+    color: white !important;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+}
+
+.employee-card-team {
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: bold;
+    color: white !important;
+    background: rgba(255,255,255,0.2);
+    border: 1px solid rgba(255,255,255,0.3);
+    display: inline-block;
+}
+
+.employee-card-details {
+    padding: 15px;
+}
+
+.employee-card-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    padding: 2px 0;
+}
+
+.employee-card-row:last-child {
+    margin-bottom: 0;
+}
+
+.card-label {
+    font-weight: bold;
+    color: #555;
+    font-size: 11px;
+    min-width: 100px;
+}
+
+.card-value {
+    color: #333;
+    font-size: 11px;
+    text-align: right;
+    flex: 1;
+    display: flex;
+    gap: 5px;
+    justify-content: flex-end;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.card-value.no-account {
+    color: #999;
+    font-style: italic;
+}
+
+.employee-card-schedule {
+    padding: 15px;
+    border-top: 1px solid #eee;
+    background: #f8f9fa;
+}
+
+.schedule-display {
+    display: flex;
+    gap: 2px;
+    margin-top: 8px;
+}
+
+.schedule-day {
+    flex: 1;
+    text-align: center;
+    padding: 4px 2px;
+    border-radius: 4px;
+    font-size: 9px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.schedule-day.working {
+    background: #0891b2;
+    color: white;
+}
+
+.schedule-day.off {
+    background: #95a5a6;
+    color: white;
+}
+
+/* Role badges in employee card */
+.employee-card-row .role-badge {
+    font-size: 9px;
+    padding: 2px 6px;
+    border-radius: 8px;
+    color: white;
+    font-weight: bold;
+}
+
+.employee-card-row .status-active {
+    background: #0891b2;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 8px;
+    font-size: 9px;
+    font-weight: bold;
+}
+
+.employee-card-row .status-inactive {
+    background: #dc2626;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 8px;
+    font-size: 9px;
+    font-weight: bold;
+}
+
+.employee-card-row .level-badge {
+    font-size: 9px;
+    padding: 2px 6px;
+    border-radius: 8px;
+    color: white;
+    font-weight: bold;
+}
+
+/* Note: hover card hiding on modal open is handled by JS, not CSS */
+
+/* Enhanced employee name hover effect */
+.employee-name:hover {
+    background: rgba(255,255,255,0.1) !important;
+    cursor: pointer;
+    transform: scale(1.02);
+    transition: all 0.2s ease;
+}
+/* Sort date highlighting */
+.sort-date-highlight {
+    background: linear-gradient(135deg, #e0f2fe 0%, #b3e5fc 100%) !important;
+    border: 2px solid #0ea5e9 !important;
+    box-shadow: 0 0 8px rgba(14, 165, 233, 0.4);
+    position: relative;
+}
+
+.sort-date-highlight::after {
+    content: '📊 SORTED';
+    position: absolute;
+    bottom: 2px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 8px;
+    background: #0ea5e9;
+    color: white;
+    padding: 2px 4px;
+    border-radius: 3px;
+    white-space: nowrap;
+    border: 1px solid rgba(255,255,255,0.3);
+    font-weight: bold;
+}
+
+/* Clear sort button styling */
+.btn-clear-sort {
+    background: #ef4444;
+    color: white;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    cursor: pointer;
+    margin-left: 8px;
+}
+
+.btn-clear-sort:hover {
+    background: #dc2626;
+    transform: scale(1.05);
+}
+
+/* Sort indicator styling */
+.sort-indicator {
+    background: #bfdbfe;
+    color: #0c4a6e;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: bold;
+    border: 1px solid #93c5fd;
+}
+/* Heatmap Integration Styles */
+.heatmap-container {
+    padding: 20px;
+    overflow-x: auto;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.heatmap-title {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 18px;
+    font-weight: bold;
+    color: #1e3a8a;
+}
+
+.heatmap-grid {
+    display: grid;
+    gap: 2px;
+    margin: 20px 0;
+    justify-content: center;
+}
+
+.time-grid {
+    grid-template-columns: 120px repeat(24, 35px);
+    grid-template-rows: repeat(8, 45px);
+}
+
+.day-grid {
+    grid-template-columns: 150px repeat(31, 30px);
+    grid-template-rows: repeat(auto, 40px);
+}
+
+.team-grid {
+    grid-template-columns: 140px repeat(7, 90px);
+    grid-template-rows: repeat(auto, 50px);
+}
+
+.heatmap-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: bold;
+    border-radius: 4px;
+    transition: all 0.2s;
+    cursor: pointer;
+    position: relative;
+    color: white;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+}
+
+.heatmap-cell:hover {
+    transform: scale(1.05);
+    z-index: 10;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.heatmap-header {
+    background: #1e40af;
+    color: white;
+    font-size: 10px;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+}
+
+.heatmap-row-header {
+    background: #64748b;
+    color: white;
+    font-size: 12px;
+    text-align: left;
+    padding-left: 10px;
+    writing-mode: horizontal-tb;
+}
+
+/* Intensity color scales - NOW CONTROLLED BY THEME SYSTEM IN INDEX.PHP */
+/* .intensity-0 { background: #f1f5f9; color: #333; }
+.intensity-1 { background: #e2e8f0; color: #333; }
+.intensity-2 { background: #cbd5e1; color: #333; }
+.intensity-3 { background: #94a3b8; color: white; }
+.intensity-4 { background: #64748b; color: white; }
+.intensity-5 { background: #475569; color: white; }
+.intensity-6 { background: #334155; color: white; }
+.intensity-7 { background: #1e293b; color: white; }
+.intensity-8 { background: #0f172a; color: white; } */
+
+.heatmap-legend {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    margin: 20px 0;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+}
+
+.legend-color {
+    width: 25px;
+    height: 18px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+}
+
+.heatmap-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.heatmap-stat-card {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border-left: 4px solid #06b6d4;
+}
+
+.heatmap-tooltip {
+    position: absolute;
+    background: #1e293b;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 11px;
+    white-space: nowrap;
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+    transform: translateX(-50%);
+    bottom: 100%;
+    left: 50%;
+    margin-bottom: 5px;
+}
+
+.heatmap-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: #1e293b;
+}
+
+.heatmap-cell:hover .heatmap-tooltip {
+    opacity: 1;
+}
+
+.loading-heatmap {
+    text-align: center;
+    padding: 60px;
+    color: #64748b;
+    font-size: 16px;
+}
+
+@media (max-width: 768px) {
+    .heatmap-grid {
+        font-size: 9px;
+    }
+    
+    .heatmap-cell {
+        min-width: 25px;
+        min-height: 25px;
+        font-size: 9px;
+    }
+    
+    .time-grid {
+        grid-template-columns: 100px repeat(24, 25px);
+        grid-template-rows: repeat(8, 35px);
+    }
+}
+               
+
+/* Ensure employee name column stays fixed width */
+.schedule-table td:first-child {
+    width: 180px;
+    min-width: 180px;
+    max-width: 180px;
+    text-align: left;
+    padding-left: 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Make date columns distribute evenly across remaining space */
+.schedule-table td:not(:first-child) {
+    width: auto; /* Allow automatic sizing */
+}
+
+/* Additional responsive adjustments for very wide months */
+@media screen and (min-width: 1400px) {
+    .schedule-table td {
+        font-size: 9px;
+        padding: 8px 3px;
+    }
+    .schedule-table th {
+        font-size: 11px;
+        padding: 10px 4px;
+    }
+}
+
+
+/* Profile Avatar Styles - Added by Picture Patcher */
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    overflow: hidden;
+    margin-right: 10px;
+    position: relative;
+    background: #0891b2;
+    flex-shrink: 0;
+}
+
+.profile-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.avatar-fallback {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 16px;
+    background: linear-gradient(135deg, #4285f4 0%, #34a853 100%);
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* User Menu Dropdown Styles */
+.user-menu-dropdown {
+    background: white !important;
+    color: #333 !important;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    border: 1px solid #ddd;
+}
+
+.user-menu-dropdown .theme-option {
+    background: white;
+    color: #333;
+}
+
+.user-menu-dropdown .theme-option:hover {
+    background: #f0f0f0 !important;
+}
+
+.user-menu-dropdown a {
+    background: #dc2626;
+    color: white !important;
+}
+
+.user-menu-dropdown a:hover {
+    background: #b91c1c !important;
+}
+
+/* MOTD Management Section - Theme-Aware Styling */
+.motd-management-section {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%) !important;
+}
+
+/* Force all MOTD text to white - very strong rules */
+.motd-management-section,
+.motd-management-section *:not(input):not(textarea):not(.motd-add-button) {
+    color: white !important;
+}
+
+.motd-section-title,
+.motd-section-description,
+.motd-form-title,
+.motd-form-label,
+.motd-form-hint,
+.motd-empty-text,
+.motd-empty-subtext,
+.motd-message-text,
+.motd-date-info,
+.motd-anniversary-badge,
+.motd-cancel-button,
+.motd-edit-button {
+    color: white !important;
+}
+
+/* Override for inputs and buttons that need specific colors */
+.motd-management-section input[type="text"],
+.motd-management-section input[type="date"],
+.motd-management-section textarea {
+    color: #333 !important;
+    background: white !important;
+}
+
+.motd-add-button {
+    color: #f093fb !important;
+    background: white !important;
+}
+
+/* Email Export Tools Section - Theme-Aware Styling */
+.email-export-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    color: white !important;
+}
+
+/* Force all Email Export text to white */
+.email-export-section,
+.email-export-section *,
+.email-export-section *:not(input):not(textarea) {
+    color: white !important;
+}
+
+.email-section-title,
+.email-section-description,
+.email-status-text {
+    color: white !important;
+}
+
+.email-button-secondary {
+    color: white !important;
+}
+
+/* Rippling API Integration - Theme-Aware Styling */
+.rippling-api-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    color: white !important;
+    padding: 20px !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+}
+
+/* Force all Rippling API text to white */
+.rippling-api-section,
+.rippling-api-section *,
+.rippling-api-section *:not(input):not(textarea) {
+    color: white !important;
+}
+
+/* View Profile Header - Theme-Aware Styling */
+.view-profile-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    color: white !important;
+}
+
+.view-profile-header,
+.view-profile-header * {
+    color: white !important;
+}
+
+/* =========================================================================
+   EXTRACTED FROM PHP FILES - DO NOT REORDER
+   Maintain exact order to preserve CSS specificity and cascade
+   ========================================================================= */
+
+/* -------------------------------------------------------------------------
+   AUTH_USER_MANAGEMENT.PHP BLOCK 2 (Original lines 3093-3269)
+   Profile modal layout, two-column forms, linking functionality
+   ------------------------------------------------------------------------- */
+    /* Profile Modal - Wider and Less Tall */
+    .profile-modal {
+        max-width: 900px !important; /* Wider */
+        max-height: 85vh !important; /* Less tall */
+        overflow-y: auto;
+    }
+    
+    /* Two-column layout for form fields */
+    .profile-modal .form-group {
+        margin-bottom: 15px; /* Reduced spacing */
+    }
+    
+    /* Photo section on the left, form fields on the right */
+    .profile-modal form > div:first-of-type {
+        display: grid;
+        grid-template-columns: 250px 1fr; /* Photo column and form column */
+        gap: 30px;
+        margin-bottom: 20px;
+    }
+    
+    /* Photo container stays in first column */
+    .current-photo-container {
+        grid-column: 1;
+        grid-row: 1 / span 6; /* Span multiple rows */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    /* Form fields in second column - two columns */
+    .profile-modal form {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px 30px;
+    }
+    
+    /* Photo section spans left side */
+    .profile-modal .form-group:first-child {
+        grid-column: 1;
+        grid-row: 1 / span 3;
+    }
+    
+    /* Regular form fields take up one column each */
+    .profile-modal .form-group:not(:first-child) {
+        grid-column: span 1;
+    }
+    
+    /* Password section spans both columns */
+    .password-section {
+        grid-column: 1 / -1;
+        border-top: 1px solid #ddd;
+        padding-top: 20px;
+        margin-top: 10px;
+    }
+    
+    /* Password fields in two columns */
+    .password-section {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px 30px;
+    }
+    
+    .password-section h4 {
+        grid-column: 1 / -1;
+        margin: 0 0 10px 0;
+    }
+    
+    .password-section > .form-note:first-of-type {
+        grid-column: 1 / -1;
+        margin: 0 0 10px 0;
+    }
+    
+    /* Buttons span both columns */
+    .profile-modal form > div[style*="text-align: center"] {
+        grid-column: 1 / -1;
+        margin-top: 15px !important;
+    }
+    
+    /* Responsive - stack on smaller screens */
+    @media (max-width: 768px) {
+        .profile-modal {
+            max-width: 95vw !important;
+        }
+        
+        .profile-modal form {
+            grid-template-columns: 1fr;
+        }
+        
+        .profile-modal .form-group:first-child {
+            grid-row: auto;
+        }
+        
+        .password-section {
+            grid-template-columns: 1fr;
+        }
+    }
+    
+    /* Manual Linking Button Styles */
+    .action-btn.link {
+        background: #28a745;
+        color: white;
+    }
+    
+    .action-btn.link:hover {
+        background: #218838;
+    }
+    
+    .action-btn.unlink {
+        background: #dc3545;
+        color: white;
+    }
+    
+    .action-btn.unlink:hover {
+        background: #c82333;
+    }
+    
+    /* Link Employee Modal */
+    #linkEmployeeModal .modal-content {
+        max-width: 500px;
+    }
+    
+    #linkEmployeeModal h2 {
+        color: #28a745;
+        margin-bottom: 15px;
+    }
+    
+    #linkEmployeeModal p {
+        margin-bottom: 20px;
+        background: #e8f5e8;
+        padding: 10px;
+        border-radius: 4px;
+        border-left: 4px solid #28a745;
+    }
+    
+    #linkEmployeeModal select {
+        font-size: 14px;
+        height: auto;
+        padding: 10px;
+    }
+    
+    #linkEmployeeModal button[type="submit"] {
+        font-weight: bold;
+        padding: 10px 20px;
+    }
+    
+    /* Enhanced Action Buttons Layout */
+    .user-actions {
+        display: flex;
+        gap: 3px;
+        flex-wrap: wrap;
+    }
+    
+    .action-btn {
+        min-width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        padding: 4px 6px;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .user-actions {
+            flex-direction: column;
+            gap: 4px;
+        }
+        
+        .action-btn {
+            width: 100%;
+            justify-content: center;
+            min-height: 32px;
+        }
+    }
+    </style>
+
+/* -------------------------------------------------------------------------
+   AUTH_USER_MANAGEMENT.PHP BLOCK 1 (Original lines 2305-2901)
+   User search UI, table layouts, animations, responsive design
+   ------------------------------------------------------------------------- */
+    /* User Search Styles */
+    .user-search-section {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .search-header h4 {
+        margin: 0 0 5px 0;
+        color: #495057;
+        font-size: 16px;
+    }
+    
+    .search-header p {
+        margin: 0 0 15px 0;
+        color: #6c757d;
+        font-size: 14px;
+    }
+    
+    /* Scoped to user search section to avoid conflict with index.php */
+    .user-search-section .search-controls {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .search-input-group {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+    
+    .search-input {
+        flex: 1;
+        padding: 10px 40px 10px 15px;
+        border: 2px solid #e9ecef;
+        border-radius: 6px;
+        font-size: 14px;
+        transition: all 0.3s;
+    }
+    
+    .search-input:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+        outline: none;
+    }
+    
+    .search-clear-btn {
+        position: absolute;
+        right: 10px;
+        background: none;
+        border: none;
+        font-size: 18px;
+        color: #6c757d;
+        cursor: pointer;
+        padding: 5px;
+        border-radius: 3px;
+        transition: all 0.2s;
+    }
+    
+    .search-clear-btn:hover {
+        background: #e9ecef;
+        color: #495057;
+    }
+    
+    .search-filters {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+    
+    .search-filters select {
+        padding: 8px 12px;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        font-size: 13px;
+        background: white;
+        min-width: 120px;
+    }
+    
+    .search-filters select:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
+        outline: none;
+    }
+    
+    .reset-filters-btn {
+        padding: 8px 12px;
+        background: #6c757d;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-size: 12px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .reset-filters-btn:hover {
+        background: #5a6268;
+        transform: translateY(-1px);
+    }
+    
+    .search-stats {
+        font-size: 13px;
+        color: #6c757d;
+        font-weight: 500;
+    }
+    
+    /* Table Enhancements */
+    .users-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        table-layout: fixed;
+    }
+    
+    /* Settings Container */
+    .user-management-wrapper {
+        max-width: 100%;
+        overflow-x: hidden;
+        box-sizing: border-box;
+        padding: 20px 40px !important;
+    }
+
+    .user-search-section {
+        padding: 0 !important;
+        margin: 0 0 20px 0 !important;
+    }
+
+    .searchable-user-table-container {
+        overflow-x: auto;
+        max-width: 100%;
+        border-radius: 12px;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Column width controls */
+    .users-table th:nth-child(1), /* Photo */
+    .users-table td:nth-child(1) {
+        width: 60px;
+        min-width: 60px;
+    }
+    
+    .users-table th:nth-child(2), /* Name */
+    .users-table td:nth-child(2) {
+        width: 140px;
+        min-width: 120px;
+    }
+    
+    .users-table th:nth-child(3), /* Username */
+    .users-table td:nth-child(3) {
+        width: 100px;
+        min-width: 80px;
+    }
+    
+    .users-table th:nth-child(4), /* Email */
+    .users-table td:nth-child(4) {
+        width: 180px;
+        min-width: 150px;
+        word-break: break-all;
+    }
+    
+    .users-table th:nth-child(5), /* Role */
+    .users-table td:nth-child(5) {
+        width: 100px;
+        min-width: 80px;
+    }
+    
+    .users-table th:nth-child(6), /* Team */
+    .users-table td:nth-child(6) {
+        width: 80px;
+        min-width: 70px;
+    }
+    
+    .users-table th:nth-child(7), /* Employee Link */
+    .users-table td:nth-child(7) {
+        width: 140px;
+        min-width: 120px;
+    }
+    
+    .users-table th:nth-child(8), /* Status */
+    .users-table td:nth-child(8) {
+        width: 70px;
+        min-width: 60px;
+    }
+    
+    .users-table th:nth-child(9), /* Created */
+    .users-table td:nth-child(9) {
+        width: 100px;
+        min-width: 90px;
+    }
+    
+    .users-table th:nth-child(10), /* Actions */
+    .users-table td:nth-child(10) {
+        width: 100px;
+        min-width: 80px;
+    }
+    
+    .users-table td {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    
+    .users-table td.user-name {
+        white-space: normal;
+        word-wrap: break-word;
+    }
+    
+    .users-table th {
+        background: #34495e;
+        color: white;
+        padding: 12px 8px;
+        text-align: left;
+        font-weight: 600;
+        font-size: 13px;
+        border: none;
+    }
+    
+    .users-table th.sortable {
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+    
+    .users-table th.sortable:hover {
+        background: #2c3e50;
+    }
+    
+    .sort-indicator {
+        margin-left: 5px;
+        font-size: 10px;
+        color: #bdc3c7;
+        min-width: 12px;
+        display: inline-block;
+    }
+    
+    .sort-indicator::before {
+        content: '⇅';
+        color: #bdc3c7;
+        font-size: 10px;
+    }
+    
+    .sort-indicator.sort-asc::before {
+        content: '';
+    }
+    
+    .sort-indicator.sort-desc::before {
+        content: '';
+    }
+    
+    .sort-indicator.sort-asc {
+        color: #27ae60;
+    }
+    
+    .sort-indicator.sort-desc {
+        color: #e74c3c;
+    }
+    
+    .users-table td {
+        padding: 12px 8px;
+        border-bottom: 1px solid #eee;
+        vertical-align: middle;
+    }
+    
+    .users-table tr:hover {
+        background: #f8f9fa;
+    }
+    
+    .user-photo-small {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #e9ecef;
+        border: 2px solid #ddd;
+    }
+    
+    .user-photo-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .user-photo-placeholder {
+        color: #6c757d;
+        font-weight: 600;
+        font-size: 14px;
+    }
+    
+    .name-container {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+    
+    .employee-link-indicator {
+        font-size: 10px;
+        background: #28a745;
+        color: white;
+        padding: 2px 6px;
+        border-radius: 10px;
+        align-self: flex-start;
+    }
+    
+    .role-badge {
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+    
+    .role-admin { background: #e74c3c; color: white; }
+    .role-manager { background: #f39c12; color: white; }
+    .role-supervisor { background: #3498db; color: white; }
+    .role-employee { background: #95a5a6; color: white; }
+    
+    .team-badge {
+        padding: 3px 6px;
+        border-radius: 3px;
+        font-size: 10px;
+        font-weight: 600;
+        background: #6c757d;
+        color: white;
+    }
+    
+    .status-badge {
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 11px;
+        font-weight: 600;
+    }
+    
+    .status-active {
+        background: #28a745;
+        color: white;
+    }
+    
+    .status-inactive {
+        background: #dc3545;
+        color: white;
+    }
+    
+    .linked-employee strong {
+        color: #495057;
+    }
+    
+    .linked-employee small {
+        color: #6c757d;
+    }
+    
+    .no-link {
+        color: #6c757d;
+        font-style: italic;
+        font-size: 12px;
+    }
+    
+    .user-actions {
+        display: flex;
+        gap: 5px;
+    }
+    
+    .action-btn {
+        padding: 6px 10px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 12px;
+        transition: all 0.2s;
+    }
+    
+    .action-btn.edit {
+        background: #3498db;
+        color: white;
+    }
+    
+    .action-btn.edit:hover {
+        background: #2980b9;
+    }
+    
+    .action-btn.view {
+        background: #95a5a6;
+        color: white;
+    }
+    
+    .action-btn.view:hover {
+        background: #7f8c8d;
+    }
+    
+    .action-btn.delete {
+        background: #e74c3c;
+        color: white;
+    }
+    
+    .action-btn.delete:hover {
+        background: #c0392b;
+    }
+    
+    .no-results {
+        text-align: center;
+        padding: 40px;
+        color: #6c757d;
+    }
+    
+    .no-results-content h3 {
+        margin: 0 0 10px 0;
+        color: #495057;
+    }
+    
+    .no-results-content p {
+        margin: 0 0 20px 0;
+        font-size: 14px;
+    }
+    
+    .clear-search-btn {
+        padding: 8px 16px;
+        background: var(--primary-color, #007bff);
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 13px;
+    }
+
+    .clear-search-btn:hover {
+        background: var(--secondary-color, #0056b3);
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 1200px) {
+        .search-filters {
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .user-management-header {
+            flex-direction: column;
+            gap: 20px;
+            text-align: center;
+        }
+        
+        .user-management-header h2 {
+            font-size: 28px;
+        }
+        
+        .header-buttons {
+            flex-direction: column;
+            width: 100%;
+        }
+        
+        .btn-purple, .btn-green {
+            width: 100%;
+            justify-content: center;
+        }
+        
+        .search-filters {
+            grid-template-columns: 1fr;
+        }
+        
+        .search-input {
+            font-size: 16px; /* Prevent zoom on iOS */
+        }
+        
+        .users-table {
+            font-size: 12px;
+        }
+        
+        .users-table th,
+        .users-table td {
+            padding: 12px 8px;
+        }
+        
+        .user-photo-small {
+            width: 40px;
+            height: 40px;
+        }
+        
+        .user-photo-placeholder {
+            font-size: 14px;
+        }
+        
+        .user-actions {
+            flex-direction: column;
+            gap: 6px;
+        }
+        
+        .action-btn {
+            width: 100%;
+            text-align: center;
+        }
+        
+        .linked-employee {
+            padding: 8px;
+        }
+        
+        .name-container strong {
+            font-size: 14px;
+        }
+        
+        .role-badge, .status-badge {
+            font-size: 10px;
+            padding: 4px 8px;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .user-search-section {
+            padding: 20px 15px;
+        }
+        
+        .search-header h4 {
+            font-size: 18px;
+        }
+        
+        .search-input {
+            padding: 12px 40px 12px 15px;
+        }
+        
+        .users-table th,
+        .users-table td {
+            padding: 10px 6px;
+        }
+        
+        .users-table {
+            min-width: 800px; /* Enable horizontal scroll on very small screens */
+        }
+        
+        .searchable-user-table-container {
+            overflow-x: auto;
+            border-radius: 12px;
+            margin: 0 -10px;
+            padding: 0 10px;
+        }
+        
+        .user-management-wrapper {
+            padding: 10px 15px !important;
+        }
+        
+        .no-results {
+            padding: 40px 20px;
+        }
+        
+        .no-results-content h3 {
+            font-size: 20px;
+        }
+        
+        .no-results-content p {
+            font-size: 14px;
+        }
+    }
+    
+    /* Animation Classes */
+    .fade-in {
+        animation: fadeIn 0.5s ease-in;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .slide-in {
+        animation: slideIn 0.3s ease-out;
+    }
+    
+    @keyframes slideIn {
+        from { transform: translateX(-100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    
+    /* Focus improvements for accessibility */
+    .search-input:focus,
+    .search-filters select:focus,
+    .action-btn:focus,
+    .btn-purple:focus,
+    .btn-green:focus,
+    .reset-filters-btn:focus {
+        outline: 3px solid rgba(66, 153, 225, 0.5);
+        outline-offset: 2px;
+    }
+    
+    /* High contrast mode support */
+    @media (prefers-contrast: high) {
+        .users-table th {
+            background: #000;
+            color: #fff;
+        }
+        
+        .role-badge, .status-badge, .team-badge {
+            border: 2px solid currentColor;
+        }
+    }
+
+/* -------------------------------------------------------------------------
+   INDEX.PHP EXTRACTED STYLES (Original lines 4139-6150)
+   Modal dialogs, MOTD banner, search controls, heatmap, sticky headers
+   ------------------------------------------------------------------------- */
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 10000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5);
+            align-items: flex-start;
+            justify-content: center;
+            padding-top: 60px;
+        }
+        
+        .modal-content {
+            background-color: #fefefe;
+            margin: 0 auto;
+            padding: 30px;
+            border: 1px solid #888;
+            border-radius: 8px;
+            max-width: 600px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+        
+        .modal-content h2 {
+            margin-top: 0;
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+
+        /* Message of the Day (MOTD) Banner - Default Theme */
+        .motd-banner {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        /* MOTD Management Section in Settings - Default Theme */
+        .motd-management-section {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        
+        /* Email Export Tools Section - Default Theme */
+        .email-export-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        /* View Profile Header - Default Theme */
+        .view-profile-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        /* Force text color white for all children */
+        .email-export-section *,
+        .view-profile-header * {
+            color: white !important;
+        }
+        
+        /* Force all MOTD text to white across all themes */
+        .motd-management-section,
+        .motd-management-section *:not(input):not(textarea):not(.motd-add-button) {
+            color: white !important;
+        }
+        
+        .motd-section-title,
+        .motd-section-description,
+        .motd-form-title,
+        .motd-form-label,
+        .motd-form-hint,
+        .motd-empty-text,
+        .motd-empty-subtext,
+        .motd-message-text,
+        .motd-date-info,
+        .motd-anniversary-badge,
+        .motd-cancel-button,
+        .motd-edit-button {
+            color: white !important;
+        }
+        
+        .motd-scrolling-content {
+            color: white !important;
+            font-weight: bold !important;
+            font-size: 18px !important;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+        }
+        
+        .motd-scrolling-content * {
+            color: white !important;
+            font-weight: bold !important;
+        }
+        
+        .motd-banner strong {
+            color: white !important;
+        }
+        
+        .motd-banner a {
+            color: #fbbf24;
+            text-decoration: underline;
+        }
+        
+        /* MOTD Scrolling Animation */
+        .motd-content-wrapper {
+            position: relative;
+        }
+        
+        .motd-scrolling-content {
+            display: inline-block;
+            white-space: nowrap;
+            animation: motd-scroll 30s linear infinite;
+            animation-delay: 2s;
+        }
+        
+        @keyframes motd-scroll {
+            0% {
+                transform: translateX(100%);
+            }
+            45% {
+                transform: translateX(0);
+            }
+            55% {
+                transform: translateX(0);
+            }
+            100% {
+                transform: translateX(-100%);
+            }
+        }
+        
+        /* Pause animation on hover */
+        .motd-banner:hover .motd-scrolling-content {
+            animation-play-state: paused;
+        }
+
+        /* Enhanced sticky header fix - prevents header movement/resizing */
+        .schedule-table {
+            width: 100% !important;
+            border-collapse: collapse !important;
+            border-spacing: 0 !important;
+            position: relative !important;
+        }
+
+        /* Desktop-only min-width to prevent mobile overflow */
+        @media (min-width: 769px) {
+            .schedule-table {
+                min-width: 1000px !important;
+            }
+        }
+        
+        .schedule-table thead {
+            position: sticky !important;
+            top: 0 !important;
+            z-index: 1000 !important;
+            background: #34495e !important;
+        }
+        
+        .schedule-table th {
+            position: sticky !important;
+            top: 0 !important;
+            z-index: 1001 !important;
+            background: #34495e !important;
+            color: white !important;
+            padding: 10px 5px !important;
+            text-align: center !important;
+            font-size: 11px !important;
+            border: 1px solid #2c3e50 !important;
+            white-space: nowrap !important;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+        }
+        
+        .schedule-table th:first-child {
+            position: sticky !important;
+            left: 0 !important;
+            top: 0 !important;
+            z-index: 1002 !important;
+            width: 210px !important;
+            text-align: left !important;
+            background: #34495e !important;
+        }
+        
+        .schedule-table .today-header {
+            background: #ff6b35 !important;
+            z-index: 1003 !important;
+        }
+        
+        .schedule-table .today-cell {
+            background: linear-gradient(135deg, rgba(255, 107, 53, 0.15) 0%, rgba(255, 107, 53, 0.05) 100%) !important;
+            border-left: 3px solid #ff6b35 !important;
+            border-right: 3px solid #ff6b35 !important;
+        }
+        
+        .schedule-wrapper {
+            overflow: auto !important;
+            max-height: 80vh !important;
+            position: relative !important;
+        }
+        
+        /* Ensure employee name column stays fixed on left */
+        .employee-name {
+            position: sticky !important;
+            left: 0 !important;
+            z-index: 100 !important;
+            background: #95a5a6 !important;
+            padding-right: 32px !important;
+        }
+        
+        /* Override: Remove background from employee names in PTO/Sick/Holiday cards */
+        .pto-section .employee-card .employee-name,
+        .sick-section .employee-card .employee-name,
+        .holiday-section .employee-card .employee-name {
+            background: none !important;
+            position: static !important;
+            left: auto !important;
+            z-index: auto !important;
+            padding: 0 !important;
+        }
+        
+        /* Employee action icons in top right */
+        .employee-actions-icons {
+            position: absolute;
+            top: 3px;
+            right: 3px;
+            display: flex;
+            gap: 5px;
+            z-index: 5;
+        }
+        
+        .employee-actions-icons button {
+            background: transparent;
+            border: none;
+            padding: 2px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            opacity: 0.7;
+        }
+        
+        .employee-actions-icons button:hover {
+            opacity: 1;
+            transform: scale(1.15);
+        }
+        
+        .employee-actions-icons button:active {
+            transform: scale(1.05);
+        }
+        
+        .employee-gear-link {
+            background: transparent;
+            border: none;
+            padding: 2px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            opacity: 0.7;
+            text-decoration: none;
+        }
+        
+        .employee-gear-link:hover {
+            opacity: 1;
+            transform: scale(1.15);
+        }
+        
+        .employee-gear-link:active {
+            transform: scale(1.05);
+        }
+        
+        /* Date sorting controls styling */
+        
+        /* Activity log button styling for bottom placement */
+        .backup-section .activity-log-btn {
+            background: #34495e;
+            border: 1px solid #2c3e50;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 13px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s;
+            margin: 0 5px;
+        }
+        
+        .backup-section .activity-log-btn:hover {
+            background: #2c3e50;
+            transform: translateY(-1px);
+        }
+        
+        .backup-section .activity-log-btn .badge {
+            background: #e74c3c;
+            color: white;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            margin-left: 3px;
+        }
+        
+        /* Activity log dropdown positioning for bottom placement */
+        #activityLogDropdown.show {
+            display: block;
+            animation: slideUpFadeIn 0.3s ease-out;
+        }
+        
+        @keyframes slideUpFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Responsive positioning for activity dropdown */
+        @media (max-width: 768px) {
+            #activityLogDropdown {
+                position: fixed !important;
+                bottom: 80px !important;
+                right: 10px !important;
+                left: 10px !important;
+                width: auto !important;
+            }
+        }
+		/* Enhanced Back to Top Button */
+.back-to-top {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: #3498db;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    transition: all 0.3s ease;
+    opacity: 0;
+    transform: translateY(20px);
+    z-index: 1000;
+}
+
+.back-to-top.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.back-to-top:hover {
+    background: #2980b9;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+}
+
+.back-to-top:active {
+    transform: translateY(-1px);
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .back-to-top {
+        bottom: 20px;
+        right: 20px;
+        width: 45px;
+        height: 45px;
+        font-size: 1.1rem;
+    }
+}
+.actions-dropdown {
+    z-index: 9999 !important;
+}
+        
+        /* Tab System */
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* Heatmap Styles */
+        .heatmap-controls {
+            padding: 12px 20px;
+            background: var(--card-bg, white);
+            border-bottom: 1px solid var(--border-color, #dee2e6);
+        }
+        
+        .heatmap-controls .control-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+        }
+        
+        .heatmap-controls .control-item {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .heatmap-controls label {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: var(--text-color, #495057);
+            font-size: 0.85em;
+        }
+        
+        .heatmap-controls select {
+            padding: 8px 12px;
+            border: 2px solid var(--border-color, #dee2e6);
+            border-radius: 6px;
+            font-size: 0.9em;
+            background: var(--card-bg, white);
+            color: var(--text-color, #495057);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .heatmap-controls select:hover {
+            border-color: var(--primary-color, #667eea);
+        }
+        
+        .heatmap-controls select:focus {
+            outline: none;
+            border-color: var(--primary-color, #667eea);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .heatmap-controls button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.9em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .heatmap-controls button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        .heatmap-controls button:active {
+            transform: translateY(0);
+        }
+        
+        .heatmap-content {
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .heatmap-container {
+            overflow-x: auto;
+            margin-top: 0;
+            display: flex;
+            justify-content: center;
+        }
+        
+        .heatmap-grid {
+            display: inline-grid;
+            grid-template-columns: 100px repeat(24, 45px);
+            gap: 2px;
+            min-width: max-content;
+        }
+        
+        .heatmap-header {
+            position: sticky;
+            top: 0;
+            background: var(--card-bg, #f8f9fa);
+            font-weight: 600;
+            padding: 6px;
+            text-align: center;
+            font-size: 0.75em;
+            border-radius: 4px;
+            z-index: 10;
+            color: var(--text-color, #495057);
+        }
+        
+        .heatmap-row-label {
+            position: sticky;
+            left: 0;
+            background: var(--card-bg, #f8f9fa);
+            font-weight: 600;
+            padding: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            font-size: 0.8em;
+            z-index: 5;
+            color: var(--text-color, #495057);
+        }
+        
+        .heatmap-cell {
+            width: 45px;
+            height: 45px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        
+        .heatmap-cell:hover {
+            transform: scale(1.1);
+            z-index: 100;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        
+        /* Heatmap intensity colors - Default Theme (overridden by theme system when other themes active) */
+        .intensity-0 { background: #f8f9fa !important; color: #6c757d !important; }
+        .intensity-1 { background: #e3f2fd !important; color: #1565c0 !important; }
+        .intensity-2 { background: #bbdefb !important; color: #0d47a1 !important; }
+        .intensity-3 { background: #90caf9 !important; color: #01579b !important; }
+        .intensity-4 { background: #64b5f6 !important; color: white !important; }
+        .intensity-5 { background: #42a5f5 !important; color: white !important; }
+        .intensity-6 { background: #2196f3 !important; color: white !important; }
+        .intensity-7 { background: #1976d2 !important; color: white !important; }
+        .intensity-8 { background: #0d47a1 !important; color: white !important; }
+        
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 10px;
+            max-width: 1200px;
+            width: 100%;
+        }
+        
+        .stat-card {
+            /* Background gradient now controlled by theme system */
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .stat-value {
+            font-size: 2em;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+        
+        .legend {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 12px;
+            background: var(--card-bg, #f8f9fa);
+            border-radius: 8px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-color, #495057);
+            font-size: 0.85em;
+        }
+        .legend-color {
+            width: 25px;
+            height: 25px;
+            border-radius: 4px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 60px;
+            font-size: 1.2em;
+            color: var(--text-muted, #6c757d);
+        }
+        
+        .heatmap-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 9999;
+            display: none;
+            align-items: flex-start;
+            justify-content: center;
+            padding-top: 50px;
+        }
+        
+        .heatmap-modal-overlay.show {
+            display: flex;
+        }
+        
+        .heatmap-modal {
+            background: var(--card-bg, white);
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            animation: slideDown 0.3s ease-out;
+        }
+        
+        @keyframes slideDown {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .heatmap-modal-header {
+            background: linear-gradient(135deg, var(--primary-color, #667eea) 0%, var(--secondary-color, #764ba2) 100%);
+            color: white;
+            padding: 20px 25px;
+            border-radius: 12px 12px 0 0;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .heatmap-modal-body {
+            padding: 25px;
+            color: var(--text-color, #333);
+            overflow-y: auto;
+            flex: 1 1 auto;
+        }
+        
+        .heatmap-modal-body .info-line {
+            font-size: 15px;
+            margin-bottom: 10px;
+            color: var(--text-color, #555);
+        }
+        
+        .heatmap-modal-body .info-line strong {
+            color: var(--text-color, #333);
+        }
+        
+        .heatmap-modal-divider {
+            border-top: 2px solid var(--border-color, #e0e0e0);
+            margin: 20px 0;
+        }
+        
+        .heatmap-modal-employees {
+            margin-top: 15px;
+        }
+        
+        .heatmap-modal-employees h4 {
+            font-size: 16px;
+            color: var(--text-color, #333);
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+        
+        .heatmap-modal-employee-list {
+            max-height: 300px;
+            max-width: 1200px;
+            overflow-y: auto;
+            padding: 10px;
+            background: var(--secondary-bg, #f8f9fa);
+            border-radius: 6px;
+        }
+        
+        .heatmap-modal-employee-item {
+            padding: 10px 12px;
+            margin-bottom: 6px;
+            background: var(--card-bg, white);
+            border-radius: 4px;
+            border-left: 3px solid var(--primary-color, #667eea);
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+        
+        .heatmap-modal-employee-item:hover {
+            background: var(--secondary-bg, #f8f9fa);
+        }
+        
+        .heatmap-modal-footer {
+            padding: 15px 25px;
+            text-align: center;
+            border-top: 1px solid var(--border-color, #e0e0e0);
+            flex-shrink: 0;
+        }
+        
+        .heatmap-modal-btn {
+            background: linear-gradient(135deg, var(--primary-color, #667eea) 0%, var(--secondary-color, #764ba2) 100%);
+            color: white;
+            border: none;
+            padding: 12px 40px;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .heatmap-modal-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+        }
+        
+        .heatmap-modal-btn:active {
+            transform: translateY(0);
+        }
+        
+        /* ============================================
+           MOBILE RESPONSIVE STYLES
+           ============================================ */
+        
+        @media (max-width: 768px) {
+            /* Container & Layout */
+            .container {
+                padding: 10px !important;
+                width: 100% !important;
+            }
+            
+            /* Header */
+            .header {
+                flex-direction: column !important;
+                gap: 15px !important;
+                padding: 15px 10px !important;
+            }
+            
+            .user-clock {
+                width: 100% !important;
+                text-align: center !important;
+            }
+            
+            .clock-time {
+                font-size: 24px !important;
+            }
+            
+            .user-info {
+                width: 100% !important;
+                justify-content: center !important;
+            }
+            
+            /* Activity Menu */
+            #userMenuDropdown {
+                position: fixed !important;
+                right: 10px !important;
+                left: 10px !important;
+                top: auto !important;
+                bottom: 70px !important;
+                width: auto !important;
+                max-height: 70vh !important;
+                overflow-y: auto !important;
+            }
+            
+            .menu-item {
+                padding: 15px 12px !important;
+                font-size: 16px !important;
+            }
+            
+            /* Calendar Navigation */
+            .nav-buttons {
+                flex-direction: column !important;
+                gap: 10px !important;
+            }
+            
+            .nav-buttons button {
+                width: 100% !important;
+                padding: 12px !important;
+                font-size: 14px !important;
+            }
+            
+            /* Month/Year Display */
+            h1 {
+                font-size: 20px !important;
+                text-align: center !important;
+            }
+            
+            /* Calendar Table */
+            .schedule-table {
+                font-size: 10px !important;
+                overflow-x: auto !important;
+            }
+            
+            .schedule-table th,
+            .schedule-table td {
+                padding: 4px 2px !important;
+                min-width: 25px !important;
+            }
+            
+            /* Employee Names Column */
+            .schedule-table td:first-child,
+            .schedule-table th:first-child {
+                position: sticky !important;
+                left: 0 !important;
+                background: var(--card-bg, white) !important;
+                z-index: 10 !important;
+                min-width: 100px !important;
+                max-width: 120px !important;
+                font-size: 11px !important;
+            }
+            
+            /* Day Cells */
+            .day-cell {
+                width: 25px !important;
+                height: 25px !important;
+                font-size: 9px !important;
+            }
+            
+            /* Forms */
+            form input[type="text"],
+            form input[type="email"],
+            form input[type="date"],
+            form input[type="number"],
+            form select,
+            form textarea {
+                font-size: 16px !important; /* Prevents iOS zoom */
+                padding: 12px !important;
+            }
+            
+            /* Buttons */
+            button {
+                min-height: 44px !important; /* iOS touch target */
+                font-size: 14px !important;
+                padding: 12px 16px !important;
+            }
+            
+            /* Grid Layouts - Stack on Mobile */
+            [style*="grid-template-columns"] {
+                grid-template-columns: 1fr !important;
+            }
+            
+            [style*="display: grid"] {
+                gap: 15px !important;
+            }
+            
+            /* Two Column Layouts */
+            [style*="grid-template-columns: 1fr 1fr"],
+            [style*="grid-template-columns: 2fr 1fr"] {
+                grid-template-columns: 1fr !important;
+            }
+            
+            /* Modals */
+            .modal-content {
+                width: 95% !important;
+                max-width: 95% !important;
+                margin: 20px auto !important;
+                max-height: 90vh !important;
+                overflow-y: auto !important;
+            }
+            
+            /* Tabs */
+            .tab-content {
+                padding: 10px !important;
+            }
+            
+            /* Profile View */
+            .view-profile-header {
+                padding: 20px 15px !important;
+            }
+            
+            .view-profile-header h1 {
+                font-size: 24px !important;
+            }
+            
+            .view-profile-header > div {
+                flex-direction: column !important;
+                text-align: center !important;
+            }
+            
+            /* Employee Cards */
+            .employee-card {
+                padding: 12px !important;
+            }
+            
+            /* Bulk Schedule Form */
+            #bulk-schedule-tab input,
+            #bulk-schedule-tab select {
+                font-size: 16px !important;
+            }
+            
+            /* Settings & Forms */
+            #settings-tab table {
+                display: block !important;
+                overflow-x: auto !important;
+            }
+            
+            /* User Menu Photo */
+            #userPhoto {
+                width: 35px !important;
+                height: 35px !important;
+            }
+            
+            /* Badge Sizing */
+            .role-badge {
+                font-size: 10px !important;
+                padding: 4px 8px !important;
+            }
+            
+            /* Hide unnecessary elements on mobile */
+            .hide-mobile {
+                display: none !important;
+            }
+            
+            /* Email Export Tool */
+            #exportEmailInput {
+                font-size: 16px !important;
+            }
+            
+            /* Flex Direction Changes */
+            [style*="display: flex"][style*="justify-content: space-between"] {
+                flex-direction: column !important;
+                gap: 10px !important;
+            }
+            
+            /* Header with buttons */
+            .header [style*="display: flex"] {
+                width: 100% !important;
+            }
+            
+            /* Action Buttons Container */
+            [style*="display: flex; justify-content: space-between; align-items: center"] {
+                flex-wrap: wrap !important;
+                gap: 10px !important;
+            }
+            
+            /* Scrollable Tables */
+            table {
+                display: block !important;
+                overflow-x: auto !important;
+                white-space: nowrap !important;
+            }
+        }
+        
+        /* Extra Small Phones */
+        @media (max-width: 480px) {
+            .clock-time {
+                font-size: 20px !important;
+            }
+            
+            .clock-timezone {
+                font-size: 11px !important;
+            }
+            
+            h1 {
+                font-size: 18px !important;
+            }
+            
+            .schedule-table {
+                font-size: 9px !important;
+            }
+            
+            .day-cell {
+                width: 22px !important;
+                height: 22px !important;
+                font-size: 8px !important;
+            }
+            
+            button {
+                font-size: 13px !important;
+                padding: 10px 12px !important;
+            }
+            
+            .modal-content {
+                width: 98% !important;
+                margin: 10px auto !important;
+            }
+        }
+        
+        /* Tablet Landscape */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .container {
+                padding: 15px !important;
+            }
+            
+            .schedule-table {
+                font-size: 12px !important;
+            }
+            
+            .day-cell {
+                width: 30px !important;
+                height: 30px !important;
+            }
+        }
+        
+        /* Prevent zoom on input focus (iOS) */
+        @media screen and (max-width: 768px) {
+            select, textarea, input[type="text"], input[type="password"],
+            input[type="datetime"], input[type="datetime-local"],
+            input[type="date"], input[type="month"], input[type="time"],
+            input[type="week"], input[type="number"], input[type="email"],
+            input[type="url"], input[type="search"], input[type="tel"] {
+                font-size: 16px !important;
+            }
+        }
+        
+        /* Touch-friendly improvements */
+        @media (hover: none) and (pointer: coarse) {
+            /* Increase touch targets */
+            button, a, .clickable, [onclick] {
+                min-height: 44px !important;
+                min-width: 44px !important;
+            }
+            
+            /* Remove hover effects on touch devices */
+            *:hover {
+                background-color: inherit !important;
+            }
+            
+            /* Better active states for touch */
+            button:active, a:active {
+                opacity: 0.7 !important;
+                transform: scale(0.98) !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <!-- User Timezone Clock -->
+            <div class="user-clock">
+                <div class="clock-time" id="userTime">Loading...</div>
+                <div class="clock-info">
+                    <div class="clock-timezone" id="userTimezone">Detecting timezone...</div>
+                    <div id="clockDate">Today</div>
+                </div>
+            </div>
+            
+            <!-- User Info -->
+            <div class="user-info">
+                <!-- Unified User Menu -->
+                <div style="position: relative; display: inline-block; display: flex; align-items: center; gap: 10px;">
+                    <!-- User Photo Circle -->
+                    <?php 
+                    $currentUserPhoto = null;
+                    // Check profile_photo first
+                    if (isset($currentUser['profile_photo']) && $currentUser['profile_photo']) {
+                        $photo = $currentUser['profile_photo'];
+                        if (strpos($photo, 'http://') === 0 || strpos($photo, 'https://') === 0) {
+                            $currentUserPhoto = $photo;
+                        }
+                    }
+                    // Fallback to google_picture
+                    if (!$currentUserPhoto && isset($currentUser['google_picture']) && $currentUser['google_picture']) {
+                        if (strpos($currentUser['google_picture'], 'https://') === 0) {
+                            $currentUserPhoto = $currentUser['google_picture'];
+                        }
+                    }
+                    ?>
+                    <div style="width: 40px; height: 40px; border-radius: 50%; overflow: hidden; border: 2px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.15); flex-shrink: 0;">
+                        <?php if ($currentUserPhoto): ?>
+                            <img src="<?php echo htmlspecialchars($currentUserPhoto); ?>" 
+                                 alt="<?php echo htmlspecialchars($currentUser['full_name']); ?>"
+                                 style="width: 100%; height: 100%; object-fit: cover;">
+                        <?php else: ?>
+                            <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 16px; background: #6c757d;">
+                                <?php echo strtoupper(substr($currentUser['full_name'], 0, 2)); ?>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                    
+                    <button class="user-menu-btn" onclick="toggleUserMenu()" 
+                            style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 8px 12px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                        👤 <?php echo escapeHtml($currentUser['full_name']); ?>
+                        <span class="role-badge role-<?php echo $currentUser['role']; ?>" style="margin: 0;">
+                            <?php echo strtoupper($currentUser['role']); ?>
+                        </span>
+                        <span style="font-size: 10px;">▼</span>
+                    </button>
+                    
+                    <div class="user-menu-dropdown" id="userMenuDropdown" 
+                         style="position: absolute; top: 100%; right: 0; margin-top: 8px; border-radius: 8px; min-width: 320px; display: none; z-index: 9999;">
+                        
+                        <!-- Profile Section -->
+                        <div style="background: #34495e; color: white; padding: 12px 15px; font-weight: bold; border-radius: 8px 8px 0 0;">
+                            Account Menu
+                        </div>
+
+                        <!-- My Profile Link -->
+                        <a href="?tab=view-profile&user_id=<?php echo $currentUser['id']; ?>" 
+                           style="text-decoration: none; color: inherit; display: block;">
+                            <div class="menu-item" onclick="event.stopPropagation(); closeUserMenu();" 
+                                 style="padding: 12px 15px; cursor: pointer; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; gap: 10px;">
+                                <span style="font-size: 18px;">👤</span>
+                                <span>My Profile</span>
+                            </div>
+                        </a>
+                        
+                        <?php 
+                        // Get user role from $currentUser (not session!)
+                        $userRole = $currentUser['role'] ?? 'employee';
+                        $isAdminOrSupervisor = in_array($userRole, ['admin', 'manager', 'supervisor']);
+                        ?>
+                        
+                        <?php if ($isAdminOrSupervisor): ?>
+                        <div class="menu-item" onclick="event.stopPropagation(); closeUserMenu(); showTab('bulk-schedule');" 
+                             style="padding: 12px 15px; cursor: pointer; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; gap: 10px;">
+                            <span style="font-size: 18px;">📅</span>
+                            <span>Bulk Schedule Changes</span>
+                        </div>
+                        <?php endif; ?>
+                        
+                        <?php if ($isAdminOrSupervisor): ?>
+                        <div class="menu-item" onclick="event.stopPropagation(); closeUserMenu(); ScheduleApp.toggleActivityLog();" 
+                             style="padding: 12px 15px; cursor: pointer; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; gap: 10px;">
+                            <span style="font-size: 18px;">📋</span>
+                            <span>Activity Log
+                                <?php 
+                                $recentLogs = getRecentActivity(5);
+                                if (count($recentLogs) > 0): 
+                                ?>
+                                <span class="badge" style="background: #e74c3c; color: white; padding: 2px 6px; border-radius: 10px; font-size: 11px; margin-left: 5px;"><?php echo count($recentLogs); ?></span>
+                                <?php endif; ?>
+                            </span>
+                        </div>
+                        <?php endif; ?>
+                        
+                        <?php if ($isAdminOrSupervisor): ?>
+                        <div class="menu-item" onclick="event.stopPropagation(); closeUserMenu(); showTab('add-employee');" 
+                             style="padding: 12px 15px; cursor: pointer; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; gap: 10px;">
+                            <span style="font-size: 18px;">➕</span>
+                            <span>Create Employee Schedule</span>
+                        </div>
+                        <?php endif; ?>
+                        
+                        <?php if ($isAdminOrSupervisor): ?>
+                        <div class="menu-item" onclick="event.stopPropagation(); closeUserMenu(); showTab('settings');" 
+                             style="padding: 12px 15px; cursor: pointer; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; gap: 10px;">
+                            <span style="font-size: 18px;">👥</span>
+                            <span>Settings</span>
+                        </div>
+                        <?php endif; ?>
+                        
+                        <?php if ($isAdminOrSupervisor): ?>
+                        <div class="menu-item" onclick="event.stopPropagation(); closeUserMenu(); showTab('backups');" 
+                             style="padding: 12px 15px; cursor: pointer; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; gap: 10px;">
+                            <span style="font-size: 18px;">💾</span>
+                            <span>Backup Management</span>
+                        </div>
+                        <?php endif; ?>
+                        
+                        <?php if ($isAdminOrSupervisor): ?>
+                        <div class="menu-item" onclick="event.stopPropagation(); closeUserMenu(); openEmployeeSetupGuide();" 
+                             style="padding: 12px 15px; cursor: pointer; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; gap: 10px;">
+                            <span style="font-size: 18px;">📋</span>
+                            <span>Employee Setup Checklist</span>
+                        </div>
+                        <?php endif; ?>
+                        
+                        <!-- Theme Section - Collapsible -->
+                        <div onclick="toggleThemeSubmenu(event)" style="background: #ecf0f1; color: #34495e; padding: 10px 15px; font-weight: bold; font-size: 12px; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+                            <span>🎨 CHANGE THEME</span>
+                            <span id="themeSubmenuArrow" style="transition: transform 0.2s;">▼</span>
+                        </div>
+                        <div id="themeSubmenu" style="display: none; overflow: hidden;">
+                            <div class="theme-option" onclick="event.stopPropagation(); handleThemeSelection('default'); closeUserMenu();" style="padding: 10px 15px; cursor: pointer; border-bottom: 1px solid #f0f0f0;">🔵 Default Theme</div>
+                            <div class="theme-option" onclick="event.stopPropagation(); handleThemeSelection('ocean'); closeUserMenu();" style="padding: 10px 15px; cursor: pointer; border-bottom: 1px solid #f0f0f0;">🌊 Ocean Blue</div>
+                            <div class="theme-option" onclick="event.stopPropagation(); handleThemeSelection('forest'); closeUserMenu();" style="padding: 10px 15px; cursor: pointer; border-bottom: 1px solid #f0f0f0;">🌲 Forest Green</div>
+                            <div class="theme-option" onclick="event.stopPropagation(); handleThemeSelection('sunset'); closeUserMenu();" style="padding: 10px 15px; cursor: pointer; border-bottom: 1px solid #f0f0f0;">🌅 Sunset Orange</div>
+                            <div class="theme-option" onclick="event.stopPropagation(); handleThemeSelection('royal'); closeUserMenu();" style="padding: 10px 15px; cursor: pointer; border-bottom: 1px solid #f0f0f0;">👑 Royal Purple</div>
+                            <div class="theme-option" onclick="event.stopPropagation(); handleThemeSelection('dark'); closeUserMenu();" style="padding: 10px 15px; cursor: pointer; border-bottom: 1px solid #f0f0f0;">🌙 Dark Mode</div>
+                            <div class="theme-option" onclick="event.stopPropagation(); handleThemeSelection('crimson'); closeUserMenu();" style="padding: 10px 15px; cursor: pointer; border-bottom: 1px solid #f0f0f0;">🔴 Crimson Red</div>
+                            <div class="theme-option" onclick="event.stopPropagation(); handleThemeSelection('teal'); closeUserMenu();" style="padding: 10px 15px; cursor: pointer; border-bottom: 1px solid #f0f0f0;">🔵 Teal Cyan</div>
+                            <div class="theme-option" onclick="event.stopPropagation(); handleThemeSelection('amber'); closeUserMenu();" style="padding: 10px 15px; cursor: pointer; border-bottom: 1px solid #f0f0f0;">👑 Amber Gold</div>
+                            <div class="theme-option" onclick="event.stopPropagation(); handleThemeSelection('slate'); closeUserMenu();" style="padding: 10px 15px; cursor: pointer; border-bottom: 1px solid #f0f0f0;">⚪ Slate Gray</div>
+                            <div class="theme-option" onclick="event.stopPropagation(); handleThemeSelection('emerald'); closeUserMenu();" style="padding: 10px 15px; cursor: pointer; border-bottom: 1px solid #f0f0f0;">🌲 Emerald Green</div>
+                            <div class="theme-option" onclick="event.stopPropagation(); handleThemeSelection('midnight'); closeUserMenu();" style="padding: 10px 15px; cursor: pointer; border-bottom: 1px solid #f0f0f0;">🌙 Midnight Blue</div>
+                            <div class="theme-option" onclick="event.stopPropagation(); handleThemeSelection('rose'); closeUserMenu();" style="padding: 10px 15px; cursor: pointer; border-bottom: 1px solid #f0f0f0;">🌹 Rose Pink</div>
+                            <div class="theme-option" onclick="event.stopPropagation(); handleThemeSelection('copper'); closeUserMenu();" style="padding: 10px 15px; cursor: pointer; border-bottom: 1px solid #f0f0f0;">🌙 Copper Bronze</div>
+                        </div>
+                        
+                        <!-- Logout Section -->
+                        <a href="?action=logout" 
+                           style="display: flex; align-items: center; gap: 10px; padding: 12px 15px; cursor: pointer; color: #e74c3c; text-decoration: none; border-radius: 0 0 8px 8px; transition: background 0.2s;">
+                            <span style="font-size: 18px;">🚪</span>
+                            <span style="font-weight: bold;">Logout</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <h1>Unified Support Schedule</h1>
+            <p>2025-2026</p>
+        </div>
+
+        <!-- Message of the Day Banner - Always visible when content exists -->
+        <?php 
+        $motdDisplay = getDisplayMOTD($employees);
+        ?>
+        <?php if ($motdDisplay['has_content']): ?>
+        <div id="motdBanner" class="motd-banner" style="padding: 15px 20px; margin: 15px 0; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); overflow: hidden;">
+            <div class="motd-inner-content" style="display: flex; align-items: center; gap: 12px;">
+                <div style="font-size: 28px; line-height: 1; flex-shrink: 0;">📢</div>
+                <div class="motd-content-wrapper" style="flex: 1; overflow: hidden;">
+                    <div class="motd-scrolling-content" style="color: white; font-weight: bold; font-size: 18px;">
+                        <?php 
+                        $fullMessage = '';
+                        
+                        // Add message if present
+                        if (!empty($motdDisplay['message'])) {
+                            $fullMessage = str_replace("\n", " • ", htmlspecialchars($motdDisplay['message']));
+                        }
+                        
+                        // Add anniversaries if present (with separator if message exists)
+                        if (!empty($motdDisplay['anniversary_message'])) {
+                            if (!empty($fullMessage)) {
+                                $fullMessage .= ' • • • ';
+                            }
+                            $fullMessage .= $motdDisplay['anniversary_message'];
+                        }
+                        
+                        echo '<span style="display: inline-block; white-space: nowrap; padding-right: 100px;">' . $fullMessage . '</span>';
+                        ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <?php endif; ?>
+
+        <?php if ($message): ?>
+        <div class="message <?php echo $messageType; ?>">
+            <?php echo escapeHtml($message); ?>
+        </div>
+        <?php endif; ?>
+
+        <!-- Employee Status Message for Employees Only -->
+<?php 
+$currentEmployee = getCurrentUserEmployee();
+if (hasPermission('edit_own_schedule') && !hasPermission('edit_schedule')): ?>
+<div class="message <?php echo $currentEmployee ? 'success' : 'info'; ?>">
+    <strong>Employee Schedule Access:</strong>
+    <?php if ($currentEmployee): ?>
+        ✅ You are linked to employee: <strong><?php echo escapeHtml($currentEmployee['name']); ?></strong> - Look for the green row with "YOU" indicator to edit your schedule.
+    <?php else: ?>
+        ✅ **Personal Schedule Access:** You can create and edit your own schedule entries. You may also request to be linked to an employee record for full integration.
+    <?php endif; ?>
+</div>
+<?php endif; ?>
+
+<script>
+// Define showTab function early so navigation buttons can use it
+function showTab(tabName) {
+    // CRITICAL: Normalize tab name - convert underscore to hyphen
+    const normalizedTabName = tabName.replace(/_/g, '-');
+    
+    // Batch DOM reads first
+    const allTabs = document.querySelectorAll('.tab-content');
+    const allNavBtns = document.querySelectorAll('.nav-tab');
+    const selectedTab = document.getElementById(normalizedTabName + '-tab');
+    
+    // Batch DOM writes together
+    requestAnimationFrame(() => {
+        // Hide all tabs and remove active class
+        allTabs.forEach(tab => {
+            tab.classList.remove('active');
+            tab.style.display = 'none';
+        });
+        
+        allNavBtns.forEach(btn => btn.classList.remove('active'));
+        
+        // Show selected tab
+        if (selectedTab) {
+            selectedTab.classList.add('active');
+            selectedTab.style.display = 'block';
+        }
+        
+        // Add active class to clicked nav tab
+        allNavBtns.forEach(btn => {
+            if (btn.onclick && btn.onclick.toString().includes(`'${tabName}'`)) {
+                btn.classList.add('active');
+            }
+        });
+        
+        // Initialize heatmap when showing heatmap tab (AFTER tab is active)
+        if (normalizedTabName === 'heatmap') {
+            // Check if function exists (it's defined later in the page)
+            if (typeof initializeHeatmap === 'function') {
+                initializeHeatmap();
+            } else {
+                console.warn('⚠️ initializeHeatmap not yet defined, will retry...');
+                // Retry after a short delay to allow the rest of the page to load
+                setTimeout(() => {
+                    if (typeof initializeHeatmap === 'function') {
+                        initializeHeatmap();
+                    } else {
+                        console.error('❌ initializeHeatmap still not defined');
+                    }
+                }, 100);
+            }
+        }
+        
+        // Initialize profile when showing profile tab (AFTER tab is active)
+        if (normalizedTabName === 'profile') {
+            const profileForms = document.querySelectorAll('#profile-tab form');
+            profileForms.forEach(form => {
+                if (!form.dataset.initialized) {
+                    form.addEventListener('submit', handleProfileFormSubmit);
+                    form.dataset.initialized = 'true';
+                }
+            });
+        }
+    });
+    
+    // Update URL with tab parameter (without page reload)
+    // Save current parameters BEFORE creating new URL
+    const currentParams = new URLSearchParams(window.location.search);
+    const currentId = currentParams.get('id');
+    const currentUserId = currentParams.get('user_id');
+    const currentTab = currentParams.get('tab');
+    
+    console.log('showTab called:', {
+        requestedTab: tabName,
+        normalizedTab: normalizedTabName,
+        currentTab: currentTab,
+        currentId: currentId,
+        currentUserId: currentUserId
+    });
+    
+    const url = new URL(window.location);
+    
+    // Clear ALL parameters
+    url.search = '';
+    
+    // Set only the tab parameter
+    url.searchParams.set('tab', tabName);
+    
+    // Add back specific parameters ONLY if staying on the same special tab
+    if (normalizedTabName === 'edit-employee' && currentId) {
+        // Only keep 'id' if it was already there
+        console.log('Keeping id parameter:', currentId);
+        url.searchParams.set('id', currentId);
+    } else if (normalizedTabName === 'view-profile' && currentUserId) {
+        // Only keep 'user_id' if it was already there
+        console.log('Keeping user_id parameter:', currentUserId);
+        url.searchParams.set('user_id', currentUserId);
+    } else {
+        console.log('Clearing all extra parameters - only keeping tab');
+    }
+    
+    console.log('New URL:', url.toString());
+    window.history.replaceState({}, '', url);
+}
+</script>
+
+        <!-- Navigation Tabs -->
+        <div class="nav-tabs">
+            <button class="nav-tab<?php echo ($activeTab === 'schedule') ? ' active' : ''; ?>" onclick="showTab('schedule')">📅 Schedule</button>
+            
+            <?php if (hasPermission('view_schedule')): ?>
+            <button class="nav-tab<?php echo ($activeTab === 'heatmap') ? ' active' : ''; ?>" onclick="showTab('heatmap')">📊 Heatmap</button>
+            <?php endif; ?>
+        </div>
+
+        <!-- Global Notification Bar (for AJAX responses) -->
+        <div id="notificationBar" style="display: none; padding: 15px 20px; margin: 20px 0; border-radius: 8px; font-size: 14px; font-weight: bold; transition: all 0.3s ease;">
+            <span id="notificationMessage"></span>
+            <button onclick="hideNotification()" style="float: right; background: none; border: none; color: inherit; cursor: pointer; font-size: 18px; font-weight: bold; opacity: 0.7; margin-top: -2px;" title="Close">&times;</button>
+        </div>
+
+        <!-- Activity Log Dropdown - Global (available on all tabs) -->
+        <?php if (hasPermission('manage_backups')): ?>
+        <div id="activityLogDropdown" class="activity-log-dropdown" style="position: fixed; bottom: 100px; right: 20px; top: auto;">
+            <div class="activity-log-header" style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <span>📋 Recent Activity</span>
+                    <span style="font-size: 10px; opacity: 0.8;">Last 20 actions</span>
+                </div>
+                <button onclick="ScheduleApp.toggleActivityLog()" style="background: none; border: none; color: inherit; cursor: pointer; font-size: 20px; padding: 0; margin: 0; opacity: 0.7; transition: opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'" title="Close">✕</button>
+            </div>
+            <div class="activity-log-content">
+                <?php 
+                $recentActivity = getRecentActivity(20);
+                if (empty($recentActivity)): 
+                ?>
+                <div class="activity-empty">
+                    No recent activity to display
+                </div>
+                <?php else: ?>
+                <?php foreach ($recentActivity as $log): ?>
+                <div class="activity-log-item">
+                    <div class="activity-icon"><?php echo getActivityIcon($log['action']); ?></div>
+                    <div class="activity-details">
+                        <div class="activity-action"><?php echo ucwords(str_replace('_', ' ', $log['action'])); ?></div>
+                        <div class="activity-description"><?php echo escapeHtml($log['details']); ?></div>
+                        <div class="activity-meta">
+                            <span class="activity-user">👤 <?php echo escapeHtml($log['user_name']); ?></span>
+                            <span class="activity-time"><?php echo formatActivityTime($log['timestamp']); ?></span>
+                        </div>
+                    </div>
+                </div>
+                <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
+        </div>
+        <?php endif; ?>
+
+        <!-- Schedule Tab -->
+        <div id="schedule-tab" class="tab-content<?php echo ($activeTab === 'schedule') ? ' active' : ''; ?>">
+            <div class="controls">
+                <form method="GET" style="display: contents;">
+                    <!-- Preserve team filter when changing other filters -->
+                    <?php if (is_array($teamFilter)): ?>
+                        <?php foreach ($teamFilter as $team): ?>
+                            <?php if ($team !== 'all'): ?>
+                                <input type="hidden" name="team[]" value="<?php echo escapeHtml($team); ?>">
+                            <?php endif; ?>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                    
+                    <label>Month:</label>
+                    <select name="monthSelect" onchange="this.form.submit();">
+                        <?php for ($y = 2025; $y <= 2027; $y++): ?>
+                            <?php for ($m = 0; $m < 12; $m++): ?>
+                                <option value="<?php echo $y; ?>-<?php echo $m; ?>" 
+                                        <?php echo ($y == $currentYear && $m == $currentMonth) ? 'selected' : ''; ?>>
+                                    <?php echo getMonthName($m) . ' ' . $y; ?>
+                                </option>
+                            <?php endfor; ?>
+                        <?php endfor; ?>
+                    </select>
+                    
+                    <label>Shift:</label>
+                    <select name="shift" onchange="this.form.submit();">
+                        <option value="all" <?php echo $shiftFilter === 'all' ? 'selected' : ''; ?>>All Shifts</option>
+                        <option value="1" <?php echo $shiftFilter === '1' ? 'selected' : ''; ?>>1st Shift</option>
+                        <option value="2" <?php echo $shiftFilter === '2' ? 'selected' : ''; ?>>2nd Shift</option>
+                        <option value="3" <?php echo $shiftFilter === '3' ? 'selected' : ''; ?>>3rd Shift</option>
+                       
+                    </select>
+                    
+                    <label>Level:</label>
+                    <select name="level" onchange="this.form.submit();">
+                        <option value="all" <?php echo $levelFilter === 'all' ? 'selected' : ''; ?>>All Levels</option>
+                        <option value="" <?php echo $levelFilter === '' ? 'selected' : ''; ?>>No Level</option>
+                        <?php foreach ($levels as $levelKey => $levelName): ?>
+                        <?php if ($levelKey !== ''): ?>
+                        <option value="<?php echo $levelKey; ?>" <?php echo $levelFilter === $levelKey ? 'selected' : ''; ?>>
+                            <?php echo $levelName; ?>
+                        </option>
+                        <?php endif; ?>
+                        <?php endforeach; ?>
+                    </select>
+                    
+                    <label>Supervisor/Manager:</label>
+                    <select name="supervisor" onchange="this.form.submit();">
+                        <option value="all" <?php echo $supervisorFilter === 'all' ? 'selected' : ''; ?>>All Supervisors/Managers</option>
+                        <option value="none" <?php echo $supervisorFilter === 'none' ? 'selected' : ''; ?>>No Supervisor/Manager</option>
+                        <?php
+                            $supMgr = array_values(array_filter($employees, 'isSupervisorOrManagerLevelStrict'));
+                            if (empty($supMgr)) {
+                                $supMgr = array_values(array_filter($employees, 'isSupervisorOrManagerLevelStrict'));
+                            }
+                            usort($supMgr, function($a, $b) { return strcasecmp($a['name'] ?? '', $b['name'] ?? ''); });
+                            foreach ($supMgr as $supervisor):
+                                $labelRole = (function_exists('getLevelName') ? getLevelName($supervisor['level'] ?? '') : '') ?: formatLeadershipLabel($supervisor); ?>
+                        <option value="<?php echo (int)$supervisor['id']; ?>" <?php echo $supervisorFilter == $supervisor['id'] ? 'selected' : ''; ?>>
+                            <?php echo escapeHtml($supervisor['name']); ?> (<?php echo strtoupper($labelRole); ?>)
+                        </option>
+                        <?php endforeach; ?>
+                    </select>
+                    
+                    <label>Skills:</label>
+                    <select name="skills" onchange="this.form.submit();">
+                        <option value="all" <?php echo $skillsFilter === 'all' ? 'selected' : ''; ?>>No sort</option>
+                        <option value="mh" <?php echo $skillsFilter === 'mh' ? 'selected' : ''; ?>>MH - Managed Hosting</option>
+                        <option value="ma" <?php echo $skillsFilter === 'ma' ? 'selected' : ''; ?>>MA - Managed Apps</option>
+                        <option value="win" <?php echo $skillsFilter === 'win' ? 'selected' : ''; ?>>Win - Windows</option>
+                    </select>
+
+<script>
+// Employee Search Functionality
+let originalEmployeeRows = null;
+let searchActive = false;
+
+function filterEmployees(searchTerm) {
+    const table = document.querySelector('.schedule-table tbody');
+    const searchResults = document.getElementById('searchResults');
+    
+    if (!table) return;
+    
+    // Store original rows on first search
+    if (!originalEmployeeRows) {
+        originalEmployeeRows = Array.from(table.querySelectorAll('tr'));
+    }
+    
+    searchTerm = searchTerm.toLowerCase().trim();
+    
+    // Save search term to localStorage for persistence
+    if (searchTerm === '') {
+        localStorage.removeItem('employeeSearchTerm');
+    } else {
+        localStorage.setItem('employeeSearchTerm', searchTerm);
+    }
+    
+    if (searchTerm === '') {
+        // Show all employees
+        restoreAllEmployees();
+        return;
+    }
+    
+    searchActive = true;
+    let visibleCount = 0;
+    
+    originalEmployeeRows.forEach(row => {
+        const employeeName = row.querySelector('.employee-name-text');
+        if (employeeName) {
+            const name = employeeName.textContent.toLowerCase();
+            const isMatch = name.includes(searchTerm);
+            
+            if (isMatch) {
+                row.style.display = '';
+                visibleCount++;
+                // Highlight matching text
+                highlightSearchTerm(employeeName, searchTerm);
+            } else {
+                row.style.display = 'none';
+            }
+        }
+    });
+    
+    // Update search results indicator
+    if (visibleCount === 0) {
+        searchResults.textContent = 'No matches found';
+        searchResults.style.background = '#f8d7da';
+        searchResults.style.color = '#721c24';
+    } else {
+        searchResults.textContent = `${visibleCount} employee${visibleCount !== 1 ? 's' : ''} found`;
+        searchResults.style.background = '#d1ecf1';
+        searchResults.style.color = '#0c5460';
+    }
+    searchResults.style.display = 'inline-block';
+}
+
+function highlightSearchTerm(element, searchTerm) {
+    const originalText = element.getAttribute('data-original-text') || element.textContent;
+    if (!element.getAttribute('data-original-text')) {
+        element.setAttribute('data-original-text', originalText);
+    }
+    
+    if (searchTerm === '') {
+        element.textContent = originalText;
+        return;
+    }
+    
+    const regex = new RegExp(`(${escapeRegExp(searchTerm)})`, 'gi');
+    const highlightedText = originalText.replace(regex, '<mark style="background: #ffeb3b; padding: 1px 2px; border-radius: 2px;">$1</mark>');
+    element.innerHTML = highlightedText;
+}
+
+function clearEmployeeSearch() {
+    const searchInput = document.getElementById('employeeSearch');
+    const searchResults = document.getElementById('searchResults');
+    
+    if (searchInput) {
+        searchInput.value = '';
+        searchInput.focus();
+    }
+    
+    if (searchResults) {
+        searchResults.style.display = 'none';
+    }
+    
+    // Clear from localStorage
+    localStorage.removeItem('employeeSearchTerm');
+    
+    restoreAllEmployees();
+}
+
+function restoreAllEmployees() {
+    const table = document.querySelector('.schedule-table tbody');
+    if (!table || !originalEmployeeRows) return;
+    
+    searchActive = false;
+    
+    // Show all rows and remove highlighting
+    originalEmployeeRows.forEach(row => {
+        row.style.display = '';
+        const employeeName = row.querySelector('.employee-name-text');
+        if (employeeName && employeeName.getAttribute('data-original-text')) {
+            employeeName.textContent = employeeName.getAttribute('data-original-text');
+        }
+    });
+}
+
+function escapeRegExp(string) {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+// Enhanced search with keyboard shortcuts
+document.addEventListener('keydown', function(event) {
+    // Ctrl/Cmd + F to focus search
+    if ((event.ctrlKey || event.metaKey) && event.key === 'f') {
+        event.preventDefault();
+        const searchInput = document.getElementById('employeeSearch');
+        if (searchInput) {
+            searchInput.focus();
+            searchInput.select();
+        }
+    }
+    
+    // Escape to clear search when input is focused
+    if (event.key === 'Escape') {
+        const searchInput = document.getElementById('employeeSearch');
+        if (searchInput && document.activeElement === searchInput) {
+            clearEmployeeSearch();
+        }
+    }
+});
+
+// Preserve search when page updates
+function preserveSearchState() {
+    const searchInput = document.getElementById('employeeSearch');
+    if (searchInput && searchInput.value) {
+        // Re-apply search after a brief delay to allow DOM to update
+        setTimeout(() => {
+            filterEmployees(searchInput.value);
+        }, 100);
+    }
+}
+
+// Initialize search preservation
+document.addEventListener('DOMContentLoaded', function() {
+    // Reset search state on page load
+    originalEmployeeRows = null;
+    searchActive = false;
+    
+    // Restore search from localStorage if available
+    const savedSearchTerm = localStorage.getItem('employeeSearchTerm');
+    const searchInput = document.getElementById('employeeSearch');
+    if (savedSearchTerm && searchInput) {
+        searchInput.value = savedSearchTerm;
+        // Wait for table to be fully rendered
+        setTimeout(function() {
+            filterEmployees(savedSearchTerm);
+        }, 100);
+    }
+    
+    // Add search preservation to form submissions
+    const forms = document.querySelectorAll('form');
+    forms.forEach(form => {
+        form.addEventListener('submit', function() {
+            const searchInput = document.getElementById('employeeSearch');
+            if (searchInput && searchInput.value) {
+                // Add hidden input to preserve search
+                const hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = 'preserveSearch';
+                hiddenInput.value = searchInput.value;
+                form.appendChild(hiddenInput);
+            }
+        });
+    });
+    
+    // Initialize MOTD visibility - No longer needed as MOTD is always visible in header
+});
+
+// Restore search from URL parameter
+<?php if (isset($_GET['preserveSearch'])): ?>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('employeeSearch');
+    if (searchInput) {
+        searchInput.value = '<?php echo escapeHtml($_GET['preserveSearch']); ?>';
+        filterEmployees(searchInput.value);
+    }
+});
+<?php endif; ?>
+
+
+// Multi-select team filter handler
+function applyTeamFilter() {
+    const form = document.getElementById('teamFilterForm');
+    const teamSelect = document.getElementById('teamFilter');
+    const selectedOptions = Array.from(teamSelect.selectedOptions);
+    
+    // If nothing is selected, default to "All Teams"
+    if (selectedOptions.length === 0) {
+        Array.from(teamSelect.options).forEach(opt => {
+            opt.selected = (opt.value === 'all');
+        });
+    }
+    // If "All Teams" is selected, deselect all others
+    else if (selectedOptions.some(opt => opt.value === 'all')) {
+        Array.from(teamSelect.options).forEach(opt => {
+            opt.selected = (opt.value === 'all');
+        });
+    }
+    
+    form.submit();
+}
+
+function clearTeamFilter() {
+    const form = document.getElementById('teamFilterForm');
+    const teamSelect = document.getElementById('teamFilter');
+    
+    // Deselect all options
+    Array.from(teamSelect.options).forEach(opt => {
+        opt.selected = false;
+    });
+    
+    // Select "All Teams"
+    const allOption = teamSelect.querySelector('option[value="all"]');
+    if (allOption) {
+        allOption.selected = true;
+    }
+    
+    // Submit the form to apply the filter
+    form.submit();
+}
+
+// Handle multi-select display hint
+document.addEventListener('DOMContentLoaded', function() {
+    const teamSelect = document.getElementById('teamFilter');
+    if (teamSelect) {
+        // Set height to show it's multi-select
+        teamSelect.style.height = 'auto';
+        
+        // If no options are selected, select "All Teams" by default
+        const selectedOptions = Array.from(teamSelect.selectedOptions);
+        if (selectedOptions.length === 0) {
+            const allOption = teamSelect.querySelector('option[value="all"]');
+            if (allOption) {
+                allOption.selected = true;
+            }
+        }
+        
+        // Add hint text
+        const label = teamSelect.previousElementSibling;
+        if (label && label.tagName === 'LABEL') {
+            label.title = 'Hold Ctrl (Cmd on Mac) to select multiple teams';
+        }
+    }
+});
+</script>
+
+<style>
+/* Tooltip Styling */
+.has-tooltip {
+    position: relative;
+    cursor: pointer;
+}
+
+.has-tooltip .tooltip {
+    display: none;
+    position: absolute;
+    left: 100%;
+    top: 0;
+    margin-left: 15px;
+    background: #2c3e50;
+    color: white;
+    padding: 16px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    z-index: 1000;
+    min-width: 500px;
+    max-width: 700px;
+    white-space: normal;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.has-tooltip:hover .tooltip {
+    display: block;
+}
+
+.tooltip::before {
+    content: '';
+    position: absolute;
+    top: 20px;
+    right: 100%;
+    border: 8px solid transparent;
+    border-right-color: #2c3e50;
+}
+
+.tooltip-header {
+    font-weight: bold;
+    font-size: 15px;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid rgba(255,255,255,0.3);
+}
+
+/* Skill badges (MH / MA / Win) — always white text regardless of theme or ancestor colour rules */
+.skill-badge,
+.sr-emp-top .skill-badge,
+.schedule-table .skill-badge,
+.sr-emp-item .skill-badge {
+    color: #fff !important;
+}
+
+/* Close (×) button inside tooltip — immune to theme button overrides */
+.tooltip-close-btn {
+    background: rgba(255,255,255,0.25) !important;
+    border: none !important;
+    color: #fff !important;
+    font-size: 18px !important;
+    line-height: 1 !important;
+    padding: 2px 8px !important;
+    border-radius: 4px !important;
+    cursor: pointer !important;
+    flex-shrink: 0 !important;
+    opacity: 0.85;
+    transition: opacity 0.15s, background 0.15s;
+}
+.tooltip-close-btn:hover {
+    background: rgba(255,255,255,0.45) !important;
+    opacity: 1;
+}
+
+.tooltip-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 20px;
+    row-gap: 0;
+}
+
+.tooltip-team-group {
+    break-inside: avoid;
+    padding-bottom: 8px;
+    margin: 0;
+}
+
+.tooltip-team {
+    font-weight: bold;
+    margin: 0 0 2px 0;
+    padding: 0;
+    color: #3498db;
+}
+
+.tooltip-employees {
+    margin: 0 0 0 10px;
+    padding: 0;
+    opacity: 0.9;
+}
+
+/* Working Today Stats Styling */
+.stat-number {
+    font-size: 64px !important;
+    font-weight: bold !important;
+    color: var(--primary-color, #0c5460) !important;
+    line-height: 1 !important;
+    margin-bottom: 8px !important;
+}
+
+.stat-label {
+    font-size: 18px !important;
+    font-weight: bold !important;
+    color: var(--text-color, #333333) !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+}
+
+/* Additional styling for search controls */
+.search-indicator {
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Theme compatibility for search controls */
+/* Force search controls to always start on second row by taking full width */
+.search-controls {
+    flex-shrink: 0;
+    flex-basis: 100%;
+    width: 100%;
+    max-width: none;
+}
+
+.controls .search-controls input:focus {
+    outline: none;
+    border-color: #094a55;
+    box-shadow: 0 0 0 2px rgba(12, 84, 96, 0.2);
+}
+
+.controls .search-controls button:hover {
+    background: #094a55;
+    transform: translateY(-1px);
+}
+
+/* Multi-select team filter styling */
+.controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.controls form {
+    display: contents;
+}
+
+.team-filter-section {
+    flex-shrink: 0;
+    max-width: 300px;
+    align-self: flex-start;
+}
+
+/* Search controls - force to second row across all browsers */
+/* Scoped to schedule controls to avoid conflict with user-search-section */
+.controls .search-controls {
+    flex-shrink: 0;
+    align-self: flex-start;
+    flex-basis: 100%;
+    width: 100%;
+    max-width: none;
+}
+
+#teamFilter {
+    height: 120px !important;
+    min-height: 120px !important;
+    max-height: 120px !important;
+    overflow-y: auto;
+    cursor: pointer;
+    resize: none !important;
+}
+
+#teamFilter option {
+    padding: 5px 8px;
+    cursor: pointer;
+}
+
+#teamFilter option:checked {
+    background: linear-gradient(0deg, #0c5460 0%, #0c5460 100%);
+    color: white;
+}
+
+.controls button[onclick="applyTeamFilter();"] {
+    background: #0c5460;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.controls button[onclick="applyTeamFilter();"]:hover {
+    background: #094a55;
+    transform: translateY(-1px);
+}
+
+.controls label[title] {
+    cursor: help;
+    position: relative;
+}
+
+/* Team filter enhanced styling */
+.team-filter-section {
+    max-width: 300px;
+}
+
+.team-filter-section label {
+    user-select: none;
+}
+
+.team-filter-section kbd {
+    font-family: monospace;
+    font-weight: bold;
+}
+
+#teamFilter option {
+    transition: background 0.1s;
+}
+
+#teamFilter option:hover {
+    background: #e8f5f7 !important;
+}
+
+/* Responsive adjustments for team filter and search */
+@media (max-width: 900px) {
+    .controls {
+        flex-direction: column;
+    }
+    
+    .team-filter-section {
+        width: 100%;
+        max-width: 100%;
+        margin-left: 0 !important;
+        margin-bottom: 15px;
+    }
+    
+    .controls .search-controls {
+        width: 100%;
+        margin-left: 0 !important;
+        margin-bottom: 15px;
+    }
+    
+    .stat-item {
+        margin-left: 0 !important;
+    }
+    
+    #teamFilter {
+        width: 100% !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .team-filter-section > form > div {
+        flex-direction: column !important;
+    }
+    
+    .team-filter-section select {
+        width: 100% !important;
+        height: 120px !important;
+    }
+    
+    .team-filter-section button[onclick="applyTeamFilter();"] {
+        width: 100% !important;
+        margin-top: 8px !important;
+    }
+}
+
+.controls .search-controls {
+    background: var(--search-bg, #ffffff) !important;
+    border-color: var(--search-border, #000000) !important;
+}
+
+.controls .search-controls label {
+    color: var(--search-text, #0c5460) !important;
+}
+
+/* =========================================================================
+   ONLINE STATUS INDICATOR
+   ========================================================================= */
+
+.online-status-indicator {
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    cursor: help;
+}
+
+/* Offline state (default - gray) */
+.online-status-indicator[data-status="offline"],
+.online-status-indicator:not([data-status]) {
+    background-color: #95a5a6 !important;
+    box-shadow: 0 0 0 0 rgba(149, 165, 166, 0);
+}
+
+/* Online state (green with pulse) */
+.online-status-indicator[data-status="online"] {
+    background-color: #2ecc71 !important;
+    box-shadow: 0 0 0 2px rgba(46, 204, 113, 0.3);
+    animation: online-pulse 2s infinite;
+}
+
+/* Away state (yellow) */
+.online-status-indicator[data-status="away"] {
+    background-color: #f39c12 !important;
+    box-shadow: 0 0 0 1px rgba(243, 156, 18, 0.3);
+}
+
+/* Busy/DND state (red) */
+.online-status-indicator[data-status="busy"] {
+    background-color: #e74c3c !important;
+    box-shadow: 0 0 0 1px rgba(231, 76, 60, 0.3);
+}
+
+/* Idle state (orange) */
+.online-status-indicator[data-status="idle"] {
+    background-color: #e67e22 !important;
+    box-shadow: 0 0 0 1px rgba(230, 126, 34, 0.3);
+}
+
+/* Pulse animation for online status */
+@keyframes online-pulse {
+    0%, 100% {
+        box-shadow: 0 0 0 2px rgba(46, 204, 113, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 0 4px rgba(46, 204, 113, 0.1);
+    }
+}
+
